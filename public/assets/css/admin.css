@@ -1,0 +1,1751 @@
+/* Stats Grid Thống Kê Admin */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-card .title {
+  font-size: 0.7rem;
+  color: var(--ios-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Bảng Glassmorphism */
+.table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  padding: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.glass-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.75rem;
+  min-width: 900px;
+}
+
+.glass-table th {
+  padding: 0.4rem 0.3rem;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--ios-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-table td {
+  padding: 0.4rem 0.3rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.glass-table tr:hover td {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Action Menu Dropdown (Menu Ba Chấm) */
+.action-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--glass-border);
+  color: var(--ios-text);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  line-height: 1;
+  transition: var(--transition);
+}
+
+.action-btn:hover,
+.action-btn.active {
+  background: rgba(0, 122, 255, 0.2);
+  color: var(--ios-blue);
+  border-color: var(--ios-blue);
+}
+
+.action-menu {
+  display: none;
+  position: fixed;
+  margin-top: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  z-index: 9999;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .action-menu {
+    background: rgba(28, 28, 30, 0.96);
+  }
+}
+
+.action-menu.show {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  color: var(--ios-text);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.action-item:hover {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--ios-blue);
+}
+
+.action-item.delete:hover {
+  background: rgba(255, 59, 48, 0.12);
+  color: var(--ios-danger);
+}
+
+/* Page Headers & Spacing */
+.page-header {
+  margin-bottom: 0.1rem;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0;
+  color: var(--ios-text);
+}
+
+.page-subtitle {
+  font-size: 0.75rem;
+  color: var(--ios-text-secondary);
+  margin: 0.15rem 0 0 0;
+}
+
+.divider-line {
+  width: 100%;
+  height: 1px;
+  background: var(--glass-border);
+  margin: 0.15rem 0 0.6rem 0;
+}
+
+.action-bar {
+  margin-bottom: 0.6rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Badges & Buttons */
+.badge-code {
+  font-family: monospace;
+  font-size: 0.7rem;
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--ios-blue);
+  padding: 0.1rem 0.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.badge-unlimited {
+  color: var(--ios-success);
+  font-size: 0.7rem;
+  background: rgba(52, 199, 89, 0.12);
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+}
+
+.badge-status {
+  padding: 0.1rem 0.3rem;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.badge-status.active {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--ios-success);
+}
+
+.badge-status.inactive {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--ios-danger);
+}
+
+.btn-icon {
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.15rem 0.25rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-icon.btn-delete {
+  background: rgba(255, 59, 48, 0.12);
+}
+
+.alert-success {
+  background: rgba(52, 199, 89, 0.1);
+  border-left: 4px solid var(--ios-success);
+  color: var(--ios-success);
+}
+
+.alert-danger {
+  background: rgba(255, 59, 48, 0.1);
+  border-left: 4px solid var(--ios-danger);
+  color: var(--ios-danger);
+}
+
+/* Helper Utility Classes */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.nowrap { white-space: nowrap; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.text-muted { color: var(--ios-text-secondary); }
+.text-success { color: var(--ios-success); }
+
+/* CSS cho hệ thống Tab Settings */
+.settings-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+.settings-tab-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-weight: 600;
+    color: var(--ios-text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+.settings-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.settings-tab-btn.active {
+    background: var(--ios-blue);
+    color: #fff;
+    border-color: var(--ios-blue);
+}
+.settings-tab-pane {
+    display: none;
+    animation: fadeInTab 0.3s ease;
+}
+.settings-tab-pane.active {
+    display: block;
+}
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Biểu mẫu cài đặt: thông tin ở trái, trường nhập ở phải */
+.settings-form {
+    gap: 0 !important;
+}
+
+.settings-form > h2 {
+    margin-bottom: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+.settings-field-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0 !important;
+    width: 100%;
+    align-items: stretch !important;
+}
+
+.settings-field-list > div,
+.settings-field-row {
+    display: grid;
+    grid-template-columns: minmax(210px, 0.75fr) minmax(0, 1.25fr);
+    align-items: center;
+    column-gap: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.settings-field-list label,
+.settings-field-row label {
+    margin: 0 !important;
+    color: var(--ios-text);
+}
+
+.settings-field-list label[data-hint]::after,
+.settings-field-row label[data-hint]::after {
+    content: attr(data-hint);
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--ios-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.settings-field-list :is(input, select, textarea),
+.settings-field-row :is(input, select, textarea) {
+    grid-column: 2;
+    min-width: 0;
+}
+
+select.glass-input option {
+    background: #1c1c1e;
+    color: #f2f2f7;
+}
+
+.settings-field-row textarea {
+    align-self: stretch;
+}
+
+.settings-payment-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 1rem !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+.settings-payment-gateway {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: 0 !important;
+    align-items: start !important;
+    min-width: 0 !important;
+    padding: 1.25rem !important;
+}
+
+.settings-payment-gateway::before {
+    content: attr(data-title) "\A" attr(data-hint);
+    grid-column: 1 / -1;
+    display: block;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--glass-border);
+    white-space: pre-line;
+    color: var(--ios-text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.settings-payment-gateway::first-line {
+    color: var(--ios-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.settings-payment-gateway > div {
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: minmax(210px, 0.75fr) minmax(0, 1.25fr);
+    align-items: center;
+    column-gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.settings-payment-gateway > div:last-child {
+    border-bottom: 0;
+}
+
+.settings-payment-gateway label {
+    margin: 0 !important;
+}
+
+.settings-payment-gateway :is(input, select) {
+    grid-column: 2;
+    min-width: 0;
+}
+
+@media (max-width: 760px) {
+    .settings-field-list > div,
+    .settings-field-row,
+    .settings-payment-gateway,
+    .settings-payment-gateway > div {
+        grid-template-columns: 1fr !important;
+        row-gap: 0.6rem;
+    }
+
+    .settings-field-list :is(input, select, textarea),
+    .settings-field-row :is(input, select, textarea),
+    .settings-payment-gateway > div,
+    .settings-payment-gateway :is(input, select) {
+        grid-column: 1;
+    }
+
+    .settings-payment-gateway::before {
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Trang nhật ký quản trị */
+.logs-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.logs-page-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.logs-page-header p {
+    margin: 0.25rem 0 0;
+    color: var(--ios-text-secondary);
+    font-size: 0.85rem;
+}
+
+.logs-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logs-page-actions form {
+    margin: 0;
+}
+
+.logs-page-actions .glass-btn,
+.logs-clear-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.logs-clear-btn {
+    border: 0;
+    border-radius: var(--radius-md);
+    background: rgba(255, 59, 48, 0.15);
+    color: var(--ios-danger);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.logs-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.logs-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--ios-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.logs-tab:hover {
+    color: var(--ios-blue);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.logs-tab.active {
+    border-color: var(--ios-blue);
+    background: var(--ios-blue);
+    color: #fff;
+}
+
+.admin-group-header {
+  margin-bottom: 0.75rem;
+}
+
+.admin-group-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.admin-group-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.admin-group-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--ios-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.admin-group-tab:hover {
+  color: var(--ios-blue);
+  background: rgba(0, 122, 255, 0.1);
+}
+
+.admin-group-tab.active {
+  border-color: var(--ios-blue);
+  background: var(--ios-blue);
+  color: #fff;
+}
+
+.logs-content-card {
+    width: 100%;
+    padding: 1.25rem;
+}
+
+.logs-bulk-form {
+    width: 100%;
+}
+
+.logs-bulk-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.logs-select-all-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ios-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.logs-select-all,
+.logs-row-select {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--ios-blue);
+    cursor: pointer;
+}
+
+.logs-select-column {
+    width: 36px;
+    text-align: center;
+}
+
+.logs-delete-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.logs-delete-selected {
+    padding: 0.5rem 0.85rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.logs-delete-selected {
+    background: var(--ios-danger);
+}
+
+.logs-delete-selected:hover {
+    filter: brightness(0.92);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Phân trang nhật ký (components/pagination.php) --- */
+.u-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+}
+.u-pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.1rem;
+    height: 2.1rem;
+    padding: 0 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ios-text, #f5f5f7);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.u-pagination-btn:hover {
+    background: rgba(0, 122, 255, 0.14);
+    color: var(--ios-blue, #007aff);
+}
+.u-pagination-btn.is-active {
+    background: var(--ios-blue, #007aff);
+    border-color: var(--ios-blue, #007aff);
+    color: #fff;
+    cursor: default;
+}
+.u-pagination-ellipsis {
+    color: var(--ios-text-secondary, #8e8e93);
+    font-size: 0.85rem;
+    padding: 0 0.15rem;
+}
+.u-pagination-summary {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--ios-text-secondary, #8e8e93);
+}
+
+.logs-id,
+.logs-user-name,
+.logs-subject {
+    font-weight: 700;
+}
+
+.logs-user {
+    color: var(--ios-blue);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.logs-user-name {
+    font-size: 0.85rem;
+}
+
+.logs-user-email,
+.logs-time {
+    color: var(--ios-text-secondary);
+    font-size: 0.8rem;
+}
+
+.logs-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.logs-badge-blue {
+    background: rgba(0, 122, 255, 0.08);
+    color: var(--ios-text);
+}
+
+.logs-badge-green {
+    background: rgba(52, 199, 89, 0.12);
+    color: var(--ios-success);
+}
+
+.logs-badge-danger {
+    background: rgba(255, 59, 48, 0.15);
+    color: var(--ios-danger);
+}
+
+.logs-code {
+    padding: 0.15rem 0.35rem;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+}
+
+.logs-code-blue {
+    color: var(--ios-blue);
+    background: rgba(0, 122, 255, 0.08);
+    font-weight: 600;
+}
+
+.logs-truncate {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ios-text-secondary);
+    font-size: 0.85rem;
+}
+
+.logs-error {
+    max-width: 200px;
+    color: var(--ios-danger);
+    font-size: 0.8rem;
+}
+
+.logs-empty {
+    padding: 2rem;
+    color: var(--ios-text-secondary);
+    text-align: center;
+}
+
+.macrodroid-log-output {
+    max-height: 600px;
+    margin: 0;
+    overflow: auto;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    background: #1e1e1e;
+    color: #00ff66;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.logs-empty-block {
+    padding: 3rem 1rem;
+    color: var(--ios-text-secondary);
+    text-align: center;
+}
+
+.logs-empty-block p {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.logs-empty-block span {
+    font-size: 0.85rem;
+}
+
+/* ============================================================
+   TOAST THÔNG BÁO — toàn bộ trang Admin
+   - Cố định góc trên bên phải, NGAY DƯỚI navbar (navbar nằm ngoài
+     vùng cuộn nên luôn ở đầu viewport → top = 64px navbar + 12px lề).
+   - z-index 10050: nổi trên mọi lớp (action-menu 9999, modal, bảng...).
+   - Viền trái 4px theo trạng thái: success / danger / warning / info.
+   - Tự đóng (nút ✕) và tự ẩn 4s nhờ vcInitGlassAlerts (admin.js)
+     thông qua class .glass-alert + .alert-close — không sửa JS.
+   ============================================================ */
+.vc-toast {
+  position: fixed;
+  top: calc(64px + 12px);
+  right: 1rem;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-sizing: border-box;
+  max-width: min(420px, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.8rem 1rem;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.45;
+  animation: vc-toast-in 0.25s ease;
+}
+@keyframes vc-toast-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.vc-toast__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+}
+.vc-toast__msg { flex: 1 1 auto; word-break: break-word; }
+
+.vc-toast__close {
+  flex: 0 0 auto;
+  margin: 0;
+  margin-left: auto;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--ios-text-secondary);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.vc-toast__close:hover { color: inherit; }
+
+/* Nhiều toast cùng lúc (flash_message + error...): xếp chồng xuống dưới, không đè nhau */
+.vc-toast + .vc-toast { top: calc(64px + 12px + 64px); }
+.vc-toast + .vc-toast + .vc-toast { top: calc(64px + 12px + 128px); }
+
+/* Màu viền + icon theo trạng thái */
+.vc-toast--success { border-left-color: var(--ios-success); }
+.vc-toast--success .vc-toast__icon { background: var(--ios-success); }
+.vc-toast--danger  { border-left-color: var(--ios-danger); }
+.vc-toast--danger  .vc-toast__icon { background: var(--ios-danger); }
+.vc-toast--warning { border-left-color: var(--ios-warning); }
+.vc-toast--warning .vc-toast__icon { background: var(--ios-warning); }
+.vc-toast--info    { border-left-color: var(--color-primary); }
+.vc-toast--info    .vc-toast__icon { background: var(--color-primary); }
+
+/* Màn hình nhỏ: trải ngang, không tràn ra ngoài */
+@media (max-width: 600px) {
+  .vc-toast {
+    top: calc(64px + 8px);
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}
+
+/* ***************************************************************************
+ * SECURITY COMMAND CENTER — SOC / TACTICAL HUD THEME  (Phase 1-3)
+ * Chỉ lớp hiển thị. Scope = body.admin-area:has(.admin-app) → chỉ trang
+ * Admin (body admin-area do layouts/admin.php đánh dấu qua header.php).
+ * Trang Home/User dùng chung wrapper .admin-app nhưng KHÔNG có admin-area
+ * → theme SOC không rò rỉ. Auth giữ nguyên.
+ * Không đụng app.css, admin.js, không đổi id/class hook, event handler.
+ * ***************************************************************************/
+
+/* ---------- 1. DESIGN TOKENS ---------- */
+body.admin-area:has(.admin-app) {
+  /* Bảng màu SOC */
+  --soc-bg-0: #05070d;
+  --soc-bg-1: #0a0f1a;
+  --soc-panel-0: rgba(13, 21, 35, 0.78);
+  --soc-panel-1: rgba(8, 13, 22, 0.84);
+  --soc-cyan: #22d3ee;
+  --soc-cyan-dim: rgba(34, 211, 238, 0.14);
+  --soc-green: #2ee6a6;
+  --soc-red: #ff4d6d;
+  --soc-amber: #ffb020;
+  --soc-line: rgba(34, 211, 238, 0.16);
+  --soc-line-strong: rgba(34, 211, 238, 0.38);
+  --soc-ink: #04121a;
+  --soc-mono: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "Segoe UI Mono", "Courier New", monospace;
+
+  /* Remap token cũ → palette SOC (style inline var(--ios-*) tự đổi theo) */
+  --color-primary: #22d3ee;
+  --color-primary-hover: #67e8f9;
+  --color-primary-soft: rgba(34, 211, 238, 0.12);
+  --color-secondary: #7dd3fc;
+  --color-success: #2ee6a6;
+  --color-warning: #ffb020;
+  --color-danger: #ff4d6d;
+  --color-text: #d9e6f5;
+  --color-text-muted: #7f92ad;
+  --color-text-inverse: #04121a;
+  --color-bg: #05070d;
+  --color-surface: #0b1322;
+  --color-surface-muted: #0e1626;
+  --color-border: rgba(34, 211, 238, 0.14);
+  --color-border-strong: rgba(34, 211, 238, 0.3);
+  --color-overlay: rgba(3, 6, 12, 0.72);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 22px 50px rgba(0, 0, 0, 0.55);
+
+  --ios-bg: #05070d;
+  --ios-text: #d9e6f5;
+  --ios-text-secondary: #7f92ad;
+  --ios-blue: #22d3ee;
+  --ios-blue-hover: #67e8f9;
+  --ios-success: #2ee6a6;
+  --ios-warning: #ffb020;
+  --ios-danger: #ff4d6d;
+
+  --glass-bg: rgba(10, 17, 29, 0.74);
+  --glass-border: rgba(34, 211, 238, 0.16);
+  --glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --glass-blur: blur(14px) saturate(135%);
+
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  --transition-fast: 140ms ease;
+  --transition: 180ms ease;
+  --focus-ring: 0 0 0 3px rgba(34, 211, 238, 0.22);
+}
+
+/* ---------- 2. NỀN TACTICAL (static — không animate → 0 cost render) ---------- */
+body.admin-area:has(.admin-app) {
+  background-color: var(--soc-bg-0);
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% -10%, rgba(34, 211, 238, 0.1), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(46, 230, 166, 0.06), transparent 55%);
+  background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+  color: var(--ios-text);
+}
+
+/* Chống nháy: preloader của trang Admin tối màu (rule #page-preloader ở app.css thắng nhờ id) */
+body.admin-area:has(.admin-app) #page-preloader {
+  background: rgba(5, 7, 13, 0.95);
+  color: #9fe9f7;
+}
+body.admin-area:has(.admin-app) .preloader-text { color: #8fb6d9; letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--soc-mono); font-size: 0.78rem; }
+body.admin-area:has(.admin-app) .preloader-spinner {
+  border-color: rgba(34, 211, 238, 0.18);
+  border-top-color: var(--soc-cyan);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+}
+
+/* Thanh tiến trình partial-load → neon cyan */
+body.admin-area:has(.admin-app) .vc-partial-progress {
+  background: linear-gradient(90deg, var(--soc-cyan), rgba(46, 230, 166, 0.7));
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
+}
+
+/* ---------- 3. SIDEBAR — HUD NAV ---------- */
+body.admin-area:has(.admin-app) .admin-sidebar {
+  width: 232px;
+  min-width: 232px;
+  background: linear-gradient(180deg, rgba(8, 13, 22, 0.97), rgba(5, 8, 15, 0.99));
+  border-right: 1px solid var(--soc-line);
+  box-shadow: inset -1px 0 0 rgba(34, 211, 238, 0.05), 8px 0 30px rgba(0, 0, 0, 0.45);
+  padding: 0.9rem 0.75rem 1.25rem;
+  gap: 0.15rem;
+}
+body.admin-area:has(.admin-app) .admin-sidebar::-webkit-scrollbar,
+body.admin-area:has(.admin-app) .admin-main::-webkit-scrollbar,
+body.admin-area:has(.admin-app) .table-responsive::-webkit-scrollbar { width: 8px; height: 8px; }
+body.admin-area:has(.admin-app) .admin-sidebar::-webkit-scrollbar-thumb,
+body.admin-area:has(.admin-app) .admin-main::-webkit-scrollbar-thumb,
+body.admin-area:has(.admin-app) .table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.24);
+  border-radius: 999px;
+}
+body.admin-area:has(.admin-app) .admin-sidebar::-webkit-scrollbar-track,
+body.admin-area:has(.admin-app) .admin-main::-webkit-scrollbar-track { background: transparent; }
+body.admin-area:has(.admin-app) .admin-sidebar::-webkit-scrollbar-thumb:hover,
+body.admin-area:has(.admin-app) .admin-main::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.45); }
+
+/* Brand */
+body.admin-area:has(.admin-app) .sidebar-brand {
+  border-bottom: 1px dashed var(--soc-line) !important;
+  padding: 0.35rem 0.35rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+body.admin-area:has(.admin-app) .sidebar-brand a,
+body.admin-area:has(.admin-app) .admin-sidebar > div {
+  color: #e8f6ff !important;
+  font-family: var(--soc-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.92rem;
+}
+body.admin-area:has(.admin-app) .sidebar-brand-mark {
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid var(--soc-line);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.25);
+}
+body.admin-area:has(.admin-app) .sidebar-section-title {
+  color: var(--soc-cyan) !important;
+  font-family: var(--soc-mono);
+  font-size: 0.66rem !important;
+  letter-spacing: 0.18em;
+  padding: 0.4rem 0.35rem 0.2rem;
+}
+body.admin-area:has(.admin-app) .sidebar-section-title::before { content: "// "; opacity: 0.7; }
+body.admin-area:has(.admin-app) .sidebar-divider { border-top: 1px solid var(--soc-line); margin-bottom: 0.5rem; }
+
+/* Nav item: thanh accent trái khi active — transition chỉ màu/border → 60fps */
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item {
+  position: relative;
+  color: #9db1c9;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--soc-cyan);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 0 8px var(--soc-cyan);
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item:hover {
+  color: #e6f7ff;
+  background: rgba(34, 211, 238, 0.08);
+  border-color: rgba(34, 211, 238, 0.22);
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item:hover::before { transform: scaleY(0.5); }
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item.active {
+  color: #eafcff;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.18), rgba(34, 211, 238, 0.04));
+  border-color: rgba(34, 211, 238, 0.38);
+  box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.08);
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item.active::before { transform: scaleY(1); }
+body.admin-area:has(.admin-app) .admin-sidebar .sidebar-nav-icon {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  color: var(--soc-cyan);
+  font-family: var(--soc-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item:hover .sidebar-nav-icon,
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item.active .sidebar-nav-icon {
+  background: rgba(34, 211, 238, 0.2);
+  border-color: rgba(34, 211, 238, 0.45);
+  color: #eafcff;
+}
+
+/* ---------- 4. TOPBAR ---------- */
+body.admin-area:has(.admin-app) .navbar-container {
+  background: rgba(7, 11, 19, 0.88) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--soc-line) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+body.admin-area:has(.admin-app) .nav-icon-button,
+body.admin-area:has(.admin-app) .notification-link,
+body.admin-area:has(.admin-app) .profile-trigger {
+  background: rgba(34, 211, 238, 0.07);
+  border-color: rgba(34, 211, 238, 0.2);
+  color: #bfe9f6;
+}
+body.admin-area:has(.admin-app) .nav-icon-button:hover,
+body.admin-area:has(.admin-app) .notification-link:hover,
+body.admin-area:has(.admin-app) .profile-trigger:hover {
+  background: rgba(34, 211, 238, 0.16);
+  border-color: var(--soc-line-strong);
+  color: #eafcff;
+}
+body.admin-area:has(.admin-app) .notification-badge {
+  background: var(--soc-red);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 77, 109, 0.7);
+}
+body.admin-area:has(.admin-app) .profile-avatar {
+  background: linear-gradient(180deg, var(--soc-cyan), #0ea5c6);
+  color: var(--soc-ink);
+  font-family: var(--soc-mono);
+}
+body.admin-area:has(.admin-app) .profile-caret { color: var(--soc-cyan); }
+/* Bù lỗi: §7 `.glass-card { position: relative }` (ưu tiên 0-3-1) áp đè
+   `.profile-menu { position: absolute }` của app.css → dropdown rơi vào flow,
+   mở ra là đẩy navbar xuống. Giữ neo tuyệt đối dưới trigger + nâng 1 lớp. */
+body.admin-area:has(.admin-app) .profile-dropdown-wrapper { z-index: 110; }
+body.admin-area:has(.admin-app) .profile-menu.glass-card,
+body.admin-area:has(.admin-app) .guest-mobile-menu.glass-card {
+  position: absolute;
+  z-index: 110;
+}
+body.admin-area:has(.admin-app) .profile-menu {
+  background: rgba(8, 13, 22, 0.97);
+  border: 1px solid var(--soc-line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+}
+body.admin-area:has(.admin-app) .profile-menu-name,
+body.admin-area:has(.admin-app) .profile-meta,
+body.admin-area:has(.admin-app) .profile-label { font-family: var(--soc-mono); }
+body.admin-area:has(.admin-app) .profile-menu-name { color: #e8f6ff; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.82rem; }
+body.admin-area:has(.admin-app) .profile-menu-section,
+body.admin-area:has(.admin-app) .profile-stats { border-color: var(--soc-line); }
+body.admin-area:has(.admin-app) .profile-value { font-family: var(--soc-mono); }
+body.admin-area:has(.admin-app) .profile-logout {
+  background: rgba(255, 77, 109, 0.12);
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  color: #ff8098;
+  font-family: var(--soc-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+body.admin-area:has(.admin-app) .profile-logout:hover { background: rgba(255, 77, 109, 0.22); }
+
+/* ---------- 5. VÙNG CUỘN CHÍNH ---------- */
+body.admin-area:has(.admin-app) .admin-main {
+  padding: 1rem 1.25rem 2.5rem;
+  gap: 1rem;
+  scrollbar-gutter: stable;
+}
+body.admin-area:has(.admin-app) .admin-content { gap: 1rem; }
+body.admin-area:has(.admin-app) .sidebar-overlay { background: rgba(3, 6, 12, 0.6); backdrop-filter: blur(3px); }
+
+/* ---------- 6. GROUP HEADER + TABS ---------- */
+body.admin-area:has(.admin-app) .admin-group-header {
+  margin-bottom: 0.5rem;
+  border-left: 3px solid var(--soc-cyan);
+  padding-left: 0.7rem;
+  box-shadow: -6px 0 18px -8px rgba(34, 211, 238, 0.6);
+}
+body.admin-area:has(.admin-app) .admin-group-header h1 {
+  color: #eaf6ff;
+  font-family: var(--soc-mono);
+  font-size: 1.15rem !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+body.admin-area:has(.admin-app) .admin-group-tabs {
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--soc-line);
+}
+body.admin-area:has(.admin-app) .admin-group-tab,
+body.admin-area:has(.admin-app) .logs-tab {
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  background: rgba(34, 211, 238, 0.05);
+  color: #93a9c2;
+  font-family: var(--soc-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  min-height: 32px;
+}
+body.admin-area:has(.admin-app) .admin-group-tab:hover,
+body.admin-area:has(.admin-app) .logs-tab:hover {
+  color: #bdf3ff;
+  background: rgba(34, 211, 238, 0.12);
+  border-color: var(--soc-line-strong);
+}
+body.admin-area:has(.admin-app) .admin-group-tab.active,
+body.admin-area:has(.admin-app) .logs-tab.active {
+  background: linear-gradient(180deg, #35e0f5, #16b6d4);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: var(--soc-ink);
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(34, 211, 238, 0.32);
+}
+body.admin-area:has(.admin-app) .admin-group-tab span,
+body.admin-area:has(.admin-app) .logs-tab span { filter: saturate(0.2) contrast(1.2); }
+
+/* ---------- 7. HUD CARD (glass-card) — viền neon + góc bracket ---------- */
+body.admin-area:has(.admin-app) .glass-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--soc-panel-0), var(--soc-panel-1));
+  border: 1px solid var(--soc-line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .glass-card::before,
+body.admin-area:has(.admin-app) .glass-card::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid rgba(34, 211, 238, 0.55);
+  pointer-events: none;
+}
+body.admin-area:has(.admin-app) .glass-card::before {
+  top: -1px;
+  left: -1px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-top-left-radius: var(--radius-lg);
+}
+body.admin-area:has(.admin-app) .glass-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-bottom-right-radius: var(--radius-lg);
+}
+body.admin-area:has(.admin-app) .glass-card:hover {
+  border-color: rgba(34, 211, 238, 0.28);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(34, 211, 238, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- 8. PAGE HEADER ---------- */
+body.admin-area:has(.admin-app) .page-header {
+  margin-bottom: 0.35rem;
+  border-left: 3px solid var(--soc-cyan);
+  padding-left: 0.7rem;
+}
+body.admin-area:has(.admin-app) .page-title {
+  color: #eaf6ff;
+  font-family: var(--soc-mono);
+  font-size: 1.15rem !important;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+body.admin-area:has(.admin-app) .page-subtitle {
+  color: var(--ios-text-secondary);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+body.admin-area:has(.admin-app) .divider-line {
+  background: linear-gradient(90deg, var(--soc-line-strong), rgba(34, 211, 238, 0.05) 60%, transparent);
+}
+body.admin-area:has(.admin-app) .action-bar { margin-bottom: 0.6rem; }
+
+/* ---------- 9. STATS / KPI MODULE ---------- */
+body.admin-area:has(.admin-app) .stats-grid { gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+body.admin-area:has(.admin-app) .glass-card.stat-card { gap: 0.35rem; overflow: hidden; }
+body.admin-area:has(.admin-app) .glass-card.stat-card .title {
+  color: #8fb6d9;
+  font-family: var(--soc-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+body.admin-area:has(.admin-app) .glass-card.stat-card .value {
+  color: #eafcff;
+  font-family: var(--soc-mono);
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 22px rgba(34, 211, 238, 0.35);
+}
+body.admin-area:has(.admin-app) .glass-card.stat-card > div:last-child { font-size: 0.75rem; }
+
+/* ---------- 10. BẢNG ĐIỀU KHIỂN ---------- */
+body.admin-area:has(.admin-app) .table-responsive {
+  padding: 0;
+  border: 1px solid var(--soc-line);
+  border-radius: var(--radius-lg);
+  background: rgba(5, 9, 16, 0.55);
+}
+body.admin-area:has(.admin-app) .glass-table {
+  font-size: 0.76rem;
+  min-width: 860px;
+}
+body.admin-area:has(.admin-app) .glass-table th {
+  padding: 0.6rem 0.55rem;
+  background: rgba(11, 19, 34, 0.98);
+  color: #85a7c7;
+  border-bottom: 1px solid var(--soc-line-strong);
+  font-family: var(--soc-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+body.admin-area:has(.admin-app) .glass-table td {
+  padding: 0.55rem;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.08);
+  color: var(--ios-text);
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+body.admin-area:has(.admin-app) .glass-table tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.015); }
+body.admin-area:has(.admin-app) .glass-table tbody tr:hover td {
+  background: rgba(34, 211, 238, 0.06);
+  box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.12), inset 0 -1px 0 rgba(34, 211, 238, 0.12);
+}
+body.admin-area:has(.admin-app) .glass-table tbody tr:last-child td { border-bottom: none; }
+
+/* ---------- 11. ACTION MENU (3 chấm) ---------- */
+body.admin-area:has(.admin-app) .action-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 6px;
+  color: #9fe9f7;
+}
+body.admin-area:has(.admin-app) .action-btn:hover,
+body.admin-area:has(.admin-app) .action-btn.active {
+  background: rgba(34, 211, 238, 0.2);
+  border-color: var(--soc-line-strong);
+  color: #eafcff;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+body.admin-area:has(.admin-app) .action-menu {
+  background: rgba(8, 13, 22, 0.98);
+  border: 1px solid var(--soc-line-strong);
+  border-radius: 8px;
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  min-width: 150px;
+  padding: 0.3rem;
+  overflow: hidden;
+}
+body.admin-area:has(.admin-app) .action-item {
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b9c9dd;
+}
+body.admin-area:has(.admin-app) .action-item:hover { background: rgba(34, 211, 238, 0.14); color: #bdf3ff; }
+body.admin-area:has(.admin-app) .action-item.delete:hover { background: rgba(255, 77, 109, 0.16); color: #ff8098; }
+
+/* ---------- 12. NÚT BẤM (nhãn ngắn — SOC wording) ---------- */
+body.admin-area:has(.admin-app) .glass-btn {
+  min-height: 34px;
+  padding: 0.45rem 0.9rem;
+  font-family: var(--soc-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--soc-ink);
+  background: var(--soc-cyan);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(34, 211, 238, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), color var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .glass-btn:hover {
+  background: #67e8f9;
+  color: var(--soc-ink);
+  transform: none;
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+body.admin-area:has(.admin-app) .glass-btn:active { background: #0ea5c6; box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35); }
+body.admin-area:has(.admin-app) .glass-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+body.admin-area:has(.admin-app) .btn-icon {
+  min-width: 26px;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  display: inline-flex;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  color: #9fe9f7;
+}
+body.admin-area:has(.admin-app) .btn-icon:hover { background: rgba(34, 211, 238, 0.18); color: #eafcff; }
+body.admin-area:has(.admin-app) .btn-icon.btn-delete {
+  background: rgba(255, 77, 109, 0.12);
+  border-color: rgba(255, 77, 109, 0.3);
+  color: #ff8098;
+}
+body.admin-area:has(.admin-app) .btn-icon.btn-delete:hover { background: rgba(255, 77, 109, 0.24); color: #ffd0d9; }
+body.admin-area:has(.admin-app) a:focus-visible,
+body.admin-area:has(.admin-app) button:focus-visible { outline: 2px solid var(--soc-cyan); outline-offset: 2px; }
+
+/* ---------- 13. INPUT / SELECT / TEXTAREA ---------- */
+body.admin-area:has(.admin-app) .glass-input {
+  min-height: 34px;
+  background: rgba(5, 9, 16, 0.75);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  color: #e6f2ff;
+  font-family: var(--soc-mono);
+  font-size: 0.78rem;
+  border-radius: 6px;
+  backdrop-filter: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .glass-input::placeholder { color: #63778f; letter-spacing: 0.04em; }
+body.admin-area:has(.admin-app) .glass-input:hover { border-color: rgba(34, 211, 238, 0.34); }
+body.admin-area:has(.admin-app) .glass-input:focus {
+  background: rgba(7, 13, 23, 0.95);
+  border-color: var(--soc-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16);
+}
+body.admin-area:has(.admin-app) select.glass-input option { background: #0b1322; color: #e6f2ff; }
+body.admin-area:has(.admin-app) textarea.glass-input { line-height: 1.55; }
+
+/* ---------- 14. BADGE / CHIP ---------- */
+body.admin-area:has(.admin-app) .badge-code {
+  font-family: var(--soc-mono);
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  color: #7ee9fb;
+}
+body.admin-area:has(.admin-app) .badge-unlimited {
+  font-family: var(--soc-mono);
+  background: rgba(46, 230, 166, 0.14);
+  border: 1px solid rgba(46, 230, 166, 0.32);
+  color: var(--soc-green);
+}
+body.admin-area:has(.admin-app) .badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--soc-mono);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+body.admin-area:has(.admin-app) .badge-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 7px currentColor;
+}
+body.admin-area:has(.admin-app) .badge-status.active { background: rgba(46, 230, 166, 0.12); color: var(--soc-green); }
+body.admin-area:has(.admin-app) .badge-status.inactive { background: rgba(255, 77, 109, 0.12); color: var(--soc-red); }
+
+/* ---------- 15. TABS (Cài đặt / Nhật ký) ---------- */
+body.admin-area:has(.admin-app) .settings-tab-btn,
+body.admin-area:has(.admin-app) .logs-tab {
+  min-height: 34px;
+  padding: 0.4rem 0.9rem;
+  background: rgba(8, 13, 22, 0.7);
+  border: 1px solid var(--soc-line);
+  border-radius: 6px;
+  color: #93b1cf;
+  font-family: var(--soc-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .settings-tab-btn:hover,
+body.admin-area:has(.admin-app) .logs-tab:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--soc-line-strong);
+  color: #cdf3ff;
+}
+body.admin-area:has(.admin-app) .settings-tab-btn.active,
+body.admin-area:has(.admin-app) .logs-tab.active {
+  background: var(--soc-cyan);
+  border-color: var(--soc-cyan);
+  color: var(--soc-ink);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+}
+body.admin-area:has(.admin-app) .settings-tab-pane[style*="block"],
+body.admin-area:has(.admin-app) .settings-tab-pane { animation: vcFadeIn 0.18s ease-out; }
+@keyframes vcFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- 16. PHÂN TRANG ---------- */
+body.admin-area:has(.admin-app) .u-pagination { gap: 0.35rem; margin-top: 1rem; flex-wrap: wrap; }
+body.admin-area:has(.admin-app) .u-pagination-btn {
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.55rem;
+  background: rgba(8, 13, 22, 0.75);
+  border: 1px solid var(--soc-line);
+  border-radius: 6px;
+  color: #a9c6e0;
+  font-family: var(--soc-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .u-pagination-btn:hover {
+  background: rgba(34, 211, 238, 0.14);
+  border-color: var(--soc-line-strong);
+  color: #eafcff;
+}
+body.admin-area:has(.admin-app) .u-pagination-btn.is-active {
+  background: var(--soc-cyan) !important;
+  border-color: var(--soc-cyan) !important;
+  color: var(--soc-ink) !important;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.35);
+}
+body.admin-area:has(.admin-app) .u-pagination-ellipsis { color: #5c7590; font-family: var(--soc-mono); }
+body.admin-area:has(.admin-app) .u-pagination-summary {
+  margin-left: auto;
+  color: var(--ios-text-secondary);
+  font-family: var(--soc-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- 17. ALERT / TOAST ---------- */
+body.admin-area:has(.admin-app) .glass-alert {
+  border: 1px solid var(--soc-line-strong);
+  border-left-width: 4px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(34, 211, 238, 0.08);
+  font-size: 0.82rem;
+}
+body.admin-area:has(.admin-app) .glass-alert .alert-close,
+body.admin-area:has(.admin-app) .vc-toast__close {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #9fb4c9;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+body.admin-area:has(.admin-app) .glass-alert .alert-close:hover,
+body.admin-area:has(.admin-app) .vc-toast__close:hover { background: rgba(255, 77, 109, 0.18); border-color: rgba(255, 77, 109, 0.4); color: #ff8098; }
+body.admin-area:has(.admin-app) .vc-toast {
+  background: rgba(8, 13, 22, 0.97);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  font-family: var(--soc-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.02em;
+}
+body.admin-area:has(.admin-app) .vc-toast__icon { color: var(--soc-ink); font-weight: 700; }
+
+/* ---------- 18. MODAL ---------- */
+body.admin-area:has(.admin-app) .glass-modal-overlay {
+  background: rgba(3, 6, 12, 0.74) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+body.admin-area:has(.admin-app) .glass-modal-overlay .glass-card { border: 1px solid var(--soc-line-strong); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7); }
+
+/* ---------- 19. EMPTY STATE / LOGS ---------- */
+body.admin-area:has(.admin-app) .logs-empty {
+  padding: 2.5rem 1rem !important;
+  color: #6f8aa5;
+  font-family: var(--soc-mono);
+  font-size: 0.75rem !important;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+body.admin-area:has(.admin-app) .logs-empty::before { content: "// "; color: var(--soc-cyan); }
+body.admin-area:has(.admin-app) .logs-page,
+body.admin-area:has(.admin-app) .logs-toolbar { --glass-bg: rgba(8, 13, 22, 0.8); }
+
+/* ---------- 20. FOOTER (admin: gói gọn, tối) ---------- */
+body.admin-area:has(.admin-app) .vc-footer {
+  background: rgba(5, 9, 16, 0.9);
+  border-top: 1px solid var(--soc-line);
+  color: var(--ios-text-secondary);
+  font-family: var(--soc-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  /* .admin-main (SOC) padding-bottom 2.5rem nhưng footer chỉ bù -1rem gốc
+   * → hở 24px dưới đáy. Bù đủ -2.5rem để footer sát đáy vùng cuộn. */
+  margin-bottom: -2.5rem;
+}
+body.admin-area:has(.admin-app) .vc-footer a:hover { color: var(--soc-cyan); }
+
+/* ---------- 21. RESPONSIVE ---------- */
+@media (max-width: 992px) {
+  body.admin-area:has(.admin-app) .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.7rem; }
+  body.admin-area:has(.admin-app) .glass-card.stat-card .value { font-size: 1.35rem; }
+}
+@media (max-width: 768px) {
+  body.admin-area:has(.admin-app) .glass-table { min-width: 680px; font-size: 0.72rem; }
+  body.admin-area:has(.admin-app) .page-title { font-size: 1rem !important; }
+  body.admin-area:has(.admin-app) .settings-tab-btn,
+  body.admin-area:has(.admin-app) .logs-tab { font-size: 0.64rem; padding: 0.35rem 0.6rem; }
+  body.admin-area:has(.admin-app) .u-pagination-summary { width: 100%; margin-left: 0; }
+}
+@media (max-width: 480px) {
+  body.admin-area:has(.admin-app) .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  body.admin-area:has(.admin-app) .glass-btn { font-size: 0.68rem; padding: 0.4rem 0.65rem; }
+}
+
+/* ---------- 22. GIẢM CHUYỂN ĐỘNG ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body.admin-area:has(.admin-app) *, body.admin-area:has(.admin-app) *::before, body.admin-area:has(.admin-app) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 23. OVERLAY SIDEBAR MOBILE ---------- */
+body.admin-area:has(.admin-app) .sidebar-overlay {
+  background: rgba(3, 6, 12, 0.66);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* ---------- 24. NAV ICON (mã mono) + TRẠNG THÁI NAV ---------- */
+body.admin-area:has(.admin-app) .admin-sidebar .sidebar-nav-icon {
+  width: auto;
+  min-width: 2rem;
+  height: 1.4rem;
+  flex: 0 0 auto;
+  padding: 0 0.3rem;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  color: #7ee9fb;
+  font-family: var(--soc-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  border-radius: 4px;
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item:hover {
+  background: rgba(34, 211, 238, 0.1);
+  color: #cdf3ff;
+  border-color: rgba(34, 211, 238, 0.25);
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item.active {
+  background: rgba(34, 211, 238, 0.16);
+  color: #f2fdff;
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.12), 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item.active .sidebar-nav-icon,
+body.admin-area:has(.admin-app) .admin-sidebar .nav-item:hover .sidebar-nav-icon {
+  background: var(--soc-cyan);
+  border-color: var(--soc-cyan);
+  color: var(--soc-ink);
+}
+
+/* ---------- 25. UTILITY ---------- */
+body.admin-area:has(.admin-app) .mono { font-family: var(--soc-mono); letter-spacing: 0.04em; }
+body.admin-area:has(.admin-app) .stat-icon {
+  font-family: var(--soc-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.15rem 0.4rem;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  color: #7ee9fb;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+
+/* ---------- 26. ICON LUCIDE THAY MÃ MONO (chỉ khu Admin) ----------
+   Helper resources/views/components/admin-icons.php render inline <svg
+   class="vc-admin-icon">. Khu user không nạp helper -> không có class này. */
+body.admin-area:has(.admin-app) .vc-admin-icon {
+  display: inline-block;
+  vertical-align: -0.18em;
+  flex: 0 0 auto;
+}
+/* Tab nhóm: icon đứng trước nhãn, thẳng hàng với chữ */
+body.admin-area:has(.admin-app) .admin-group-tab {
+  align-items: center;
+}
+body.admin-area:has(.admin-app) .admin-group-tab .vc-admin-icon {
+  opacity: 0.85;
+}
+body.admin-area:has(.admin-app) .admin-group-tab.active .vc-admin-icon { opacity: 1; }
+/* Sidebar: pill giữ nền/viền, vừa khung để icon nằm giữa */
+body.admin-area:has(.admin-app) .admin-sidebar .sidebar-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.5rem;
+  padding: 0 0.25rem;
+}
+body.admin-area:has(.admin-app) .admin-sidebar .sidebar-nav-icon .vc-admin-icon {
+  vertical-align: middle;
+}
+/* Stat card: bỏ letter-spacing/mono của nhãn chữ, giữ nền pill */
+body.admin-area:has(.admin-app) .stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem;
+  letter-spacing: 0;
+}
+/* Fallback: nếu thiếu icon thì vẫn hiện mã chữ, không vỡ ô */
+body.admin-area:has(.admin-app) .stat-icon:empty,
+body.admin-area:has(.admin-app) .sidebar-nav-icon:empty { display: none; }
+
+
+/* Tab nhật ký: icon Lucide thay mã chữ (TXT/AUT/EML/AI/MSG) */
+body.admin-area:has(.admin-app) .logs-tab span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  filter: none;
+}
+body.admin-area:has(.admin-app) .logs-tab .vc-admin-icon { vertical-align: middle; }

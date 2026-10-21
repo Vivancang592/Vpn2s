@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Mat cuoi + hieu tuong lien ket (dong bo voi favicon.png) -->
+  <circle cx="243" cy="243" r="196" fill="#2B2B2B"/>
+  <circle cx="243" cy="243" r="182" fill="#FFCC00"/>
+  <ellipse cx="182" cy="200" rx="28" ry="39" fill="#2B2B2B"/>
+  <ellipse cx="304" cy="200" rx="28" ry="39" fill="#2B2B2B"/>
+  <circle cx="191" cy="187" r="8" fill="#FFFFFF"/>
+  <circle cx="313" cy="187" r="8" fill="#FFFFFF"/>
+  <path d="M148.6 305.6 A109 87.2 0 0 0 337.4 305.6" fill="none" stroke="#2B2B2B" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="405" cy="405" r="105" fill="#2B2B2B"/>
+  <circle cx="405" cy="405" r="91" fill="#FFFFFF"/>
+  <circle cx="375" cy="405" r="38" fill="none" stroke="#2B2B2B" stroke-width="16"/>
+  <circle cx="445" cy="405" r="38" fill="none" stroke="#2B2B2B" stroke-width="16"/>
+</svg>
+
