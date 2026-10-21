@@ -1953,3 +1953,5 @@ body.user-area .vc-notice-card:not(.vc-notice-card--bg) .vc-notice-x {
 @media (max-width: 560px) {
     .vc-notice-card { max-height: 84vh; border-radius: 16px; }
 }
+/* Gói được ẩn theo filter group */
+.user-plan-card.is-hidden, .plan-card-vip.is-hidden { display: none !important; }

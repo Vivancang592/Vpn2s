@@ -120,8 +120,8 @@ $loggedIn = !empty($_SESSION['user_id']);
         </div>
         <?php if ($groups): ?>
             <div class="home-tabs" role="tablist">
-                <?php $i = 0; foreach ($groups as $name => $items): ?>
-                    <button class="home-tab" type="button" role="tab" aria-controls="home-panel-<?= $i ?>" aria-selected="<?= $i === 0 ? 'true' : 'false' ?>"><?= htmlspecialchars($name) ?></button>
+                <?php $i = 0; foreach ($groups as $groupIds => $items): ?>
+                    <button class="home-tab" type="button" role="tab" aria-controls="home-panel-<?= $i ?>" aria-selected="<?= $i === 0 ? 'true' : 'false' ?>" data-home-tab-group="<?= $i ?>"><?= htmlspecialchars($groupIds) ?></button>
                 <?php $i++; endforeach; ?>
             </div>
         <?php endif; ?>

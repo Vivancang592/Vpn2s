@@ -1155,6 +1155,89 @@ if (!response.ok || !result.valid) {
     // khi cả 2 file cùng thêm listener DOMContentLoaded.
     if (!window.__vcInitAtDom) {
         window.__vcInitAtDom = true;
+        
+        /* ===== FILTER GÓI THEO NHóm SERVER (Plans & Home) ===== */
+        let currentFilterGroup = null; // nhóm đang được chọn
+        
+        function applyPlanFilter() {
+            const userPlans = document.querySelectorAll('.user-plan-card, .plan-card-vip');
+            
+            Array.from(userPlans).forEach(planCard => {
+                const planIdsStr = planCard.getAttribute('data-plan-group-ids');
+                if (!planIdsStr) return;
+                
+                try {
+                    const planGroupIds = JSON.parse(planIdsStr);
+                    
+                    // Hiển thị gói nếu thuộc nhóm đang chọn (hoặc tất cả)
+                    if (planGroupIds.includes(currentFilterGroup)) {
+                        planCard.classList.remove('is-hidden');
+                    } else {
+                        planCard.classList.add('is-hidden');
+                    }
+                } catch (e) {
+                    console.warn('Lỗi parse group IDs:', e);
+                }
+            });
+        }
+        
+        // Xử lý tab filters cho Plans Page
+        document.addEventListener('DOMContentLoaded', function () {
+            const planGroupTabs = document.querySelectorAll('.user-plan-group-tab[data-plan-group-filter]');
+            
+            if (planGroupTabs.length > 0) {
+                planGroupTabs.forEach(tab => {
+                    tab.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        
+                        // Cập nhật class active trên tab
+                        document.querySelectorAll('.user-plan-group-tab').forEach(t => t.classList.remove('is-active'));
+                        this.classList.add('is-active');
+                        
+                        const filterGroup = this.getAttribute('data-plan-group-filter');
+                        
+                        // Lưu trạng thái vào grid cha và cập nhật currentFilterGroup
+                        window.currentPlanFilterGroup = filterGroup;
+                        currentFilterGroup = filterGroup;
+                        
+                        // Áp dụng filter ngay lập tức
+                        applyPlanFilter();
+                    });
+                });
+            }
+            
+            // Xử lý tab filters cho Home Page
+            const homeTabs = document.querySelectorAll('.home-tab[data-home-tab-group]');
+            if (homeTabs.length > 0) {
+                homeTabs.forEach(tab => {
+                    tab.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        
+                        // Cập nhật class active trên tab
+                        document.querySelectorAll('.home-tab').forEach(t => t.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const selectedTabIndex = parseInt(this.getAttribute('data-home-tab-group'));
+                        
+                        // Lấy group IDs từ tab đang được chọn
+                        window.currentPlanFilterGroup = [selectedTabIndex];
+                        currentFilterGroup = selectedTabIndex;
+                        
+                        // Áp dụng filter ngay lập tức
+                        applyPlanFilter();
+                    });
+                });
+            }
+            
+            window.vcApplyPlanFilter = applyPlanFilter;
+        });
+        
+        // Gọi ngay lập tức để hiển thị các gói khi load trang
+        window.__vcInitAtDom = true;
         window.vcInitPageContent(document);
+        if (window.currentPlanFilterGroup) {
+            currentFilterGroup = window.currentPlanFilterGroup;
+            applyPlanFilter();
+        }
     }
 });
