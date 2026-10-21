@@ -1,4 +1,4 @@
-vpn2sCREATE TABLE `vc_settings` (
+CREATE TABLE `vc_settings` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `setting_key` VARCHAR(100) NOT NULL UNIQUE,
     `setting_value` TEXT NULL,
