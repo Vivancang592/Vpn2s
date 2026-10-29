@@ -156,6 +156,22 @@ cd /www/wwwroot/vpn2s.linksub24h.com
 bash vc_update.sh
 ```
 
+### Cài bổ sung schema AI Customer Service trên database hiện có
+
+Code AI Customer Service cần các bảng `vc_ai_*`. Với website đã có database, sau khi sao lưu database và cập nhật mã nguồn, chạy migration bổ sung bên dưới từ thư mục gốc dự án bằng tài khoản chỉ có quyền trên đúng database:
+
+```bash
+mysql -h DB_HOST -u DB_USERNAME -p DB_DATABASE < database/migrations/20261029_create_ai_customer_service_tables.sql
+```
+
+Nhập mật khẩu khi MySQL hỏi. Script chỉ tạo các bảng còn thiếu, không xóa hoặc sửa bảng hiện có; cần có sẵn `vc_users.id` kiểu `BIGINT UNSIGNED`. Nếu một số bảng `vc_ai_*` đã tồn tại, hãy đối chiếu cấu trúc trước khi chạy vì `IF NOT EXISTS` không tự sửa bảng đang có nhưng không tương thích. Có thể kiểm tra sau khi chạy bằng:
+
+```sql
+SHOW TABLES LIKE 'vc_ai_%';
+```
+
+Chỉ cấu hình callback Facebook sau khi migration thành công và endpoint HTTPS công khai hoạt động.
+
 ---
 ## Chạy cron trong temina
 

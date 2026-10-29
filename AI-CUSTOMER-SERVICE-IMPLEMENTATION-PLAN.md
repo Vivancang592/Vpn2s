@@ -97,7 +97,7 @@
 
 ### Thiết kế nền tảng đã chốt cho các phần tiếp theo
 
-- Chỉ dùng schema đã xác minh; không chạy migration. Nếu cần hỗ trợ cài mới, chuẩn bị SQL additive riêng sau khi đối chiếu cấu trúc đầy đủ và không tự áp dụng.
+- Chỉ dùng schema đã xác minh; migration additive `database/migrations/20261029_create_ai_customer_service_tables.sql` đã được tạo theo metadata schema local. Migration chưa chạy trên local hoặc production; cần sao lưu và xác nhận `vc_users.id` là `BIGINT UNSIGNED` trước khi admin áp dụng.
 - Mọi endpoint quản trị phải qua router Admin, dùng CSRF cho thao tác ghi, xác thực dữ liệu, giới hạn truy vấn và trả JSON lỗi ổn định. Webhook công khai là ngoại lệ có xác minh chữ ký/handshake và không dựa vào session Admin.
 - Bí mật provider/Meta phải được mã hóa xác thực ở server bằng khóa mã hóa riêng từ environment; không lưu dạng rõ vào `vc_settings`, HTML, JavaScript, localStorage, response, log hay audit. Nếu khóa chưa cấu hình, thao tác lưu/kiểm tra bí mật phải báo lỗi rõ ràng và không ghi dữ liệu. Trường bí mật chỉ nhận giá trị thay thế; response chỉ trả trạng thái đã cấu hình.
 - Thao tác takeover/trả AI và gửi AI phải kiểm tra/khóa trạng thái hội thoại trong transaction để tránh gửi khi `staff_active` hoặc `ai_paused`; webhook/message external phải chống lặp bằng unique key hiện có.
