@@ -59,8 +59,9 @@
 
 - [x] Xác minh tài liệu Meta hiện hành và phiên bản Graph API trước khi cấu hình.
 - [x] Triển khai xác minh callback, HMAC chữ ký request, chống gửi lặp theo khóa DB và lưu sự kiện tin nhắn.
-- [x] Nối nhận/gửi tin nhắn Fanpage; chỉ xác nhận hoạt động sau handshake Meta và credential hợp lệ.
-- **Tiêu chí hoàn thành:** xác minh HMAC đúng/sai thuần cục bộ đã đạt; handshake/sự kiện/gửi thật vẫn chờ Meta credential và webhook được duyệt.
+- [x] Nối nhận/gửi tin nhắn Fanpage; tin inbound hợp lệ chuyển sang AI và tự xử lý sau khi callback được xác nhận, đồng thời giữ nguyên trạng thái kỹ thuật viên tiếp quản/yêu cầu handoff.
+- [x] Nút kiểm tra Meta gọi Graph API kiểm tra Page ID/Page Access Token; tab Giám sát nêu rõ trường còn thiếu, kết quả kiểm tra và thời điểm webhook hợp lệ cuối cùng.
+- **Tiêu chí hoàn thành:** mã xử lý đã nối; cần xác nhận trên credential thật rằng kiểm tra kết nối thành công, webhook nhận event và AI gửi reply đúng.
 
 ### Phần 6F — Kiến thức, quy tắc và tác vụ vận hành
 

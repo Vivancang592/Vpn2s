@@ -108,6 +108,7 @@ return [
     'POST /admin/ai-customer-service/monitor-settings' => ['Admin\AiCustomerServiceController', 'saveMonitorSettings'],
     'POST /admin/ai-customer-service/handoff-rules' => ['Admin\AiCustomerServiceController', 'saveHandoffRules'],
     'POST /admin/ai-customer-service/meta-settings' => ['Admin\AiCustomerServiceController', 'saveMetaSettings'],
+    'POST /admin/ai-customer-service/meta-test' => ['Admin\AiCustomerServiceController', 'testMetaConnection'],
     'GET /admin/notifications'            => ['Admin\DashboardController', 'notifications'],
     'POST /admin/notifications/read-all'  => ['Admin\DashboardController', 'markAllNotificationsAsRead'],
     'POST /admin/notifications/delete'    => ['Admin\DashboardController', 'deleteNotification'],

@@ -54,12 +54,7 @@ class AiCustomerServiceController extends BaseController
             && $providerSettings['model'] !== 'auto';
         $providerVerified = $providerConfigured && !empty($providerSettings['connection_verified']);
         $metaSettings = $this->metaService->settingsForAdmin();
-        $metaConfigured = $metaSettings['meta_app_id'] !== ''
-            && $metaSettings['meta_page_id'] !== ''
-            && $metaSettings['meta_app_secret_configured']
-            && $metaSettings['verify_token_configured']
-            && $metaSettings['page_access_token_configured']
-            && $metaSettings['secret_storage_ready'];
+        $metaConfigured = $metaSettings['configured'];
         $stats['status'] = $providerConfigured
             ? ($providerVerified
                 ? 'Đã kiểm tra kết nối ' . ($providerSettings['provider'] ?: 'provider')
@@ -176,12 +171,11 @@ class AiCustomerServiceController extends BaseController
                 'model_selected' => $provider['model'] !== '' && $provider['model'] !== 'auto',
             ],
             'meta' => [
-                'configured' => $meta['meta_app_id'] !== ''
-                    && $meta['meta_page_id'] !== ''
-                    && $meta['meta_app_secret_configured']
-                    && $meta['verify_token_configured']
-                    && $meta['page_access_token_configured']
-                    && $meta['secret_storage_ready'],
+                'configured' => $meta['configured'],
+                'missing_fields' => $meta['missing_fields'],
+                'connection_verified' => $meta['connection_verified'],
+                'connection_verified_at' => $meta['connection_verified_at'],
+                'last_webhook_received_at' => $meta['last_webhook_received_at'],
             ],
         ];
     }
@@ -502,6 +496,34 @@ class AiCustomerServiceController extends BaseController
             $this->respond(['ok' => false, 'message' => 'Không thể lưu cấu hình Meta.'], 500);
         } catch (RuntimeException $exception) {
             $this->respond(['ok' => false, 'message' => $exception->getMessage()], 503);
+        }
+    }
+
+    public function testMetaConnection(): void
+    {
+        $input = $this->readJsonInput();
+        if ($input === null) {
+            $this->respond(['ok' => false, 'message' => 'Nội dung yêu cầu không hợp lệ.'], 400);
+        }
+        if (!$this->validateCsrfToken(is_string($input['csrf_token'] ?? null) ? $input['csrf_token'] : null)) {
+            $this->respond(['ok' => false, 'message' => 'Phiên bảo mật đã hết hạn. Hãy tải lại trang rồi thử lại.'], 419);
+        }
+        $lastTestAt = (int) ($_SESSION['ai_cs_meta_test_at'] ?? 0);
+        if (time() - $lastTestAt < 10) {
+            $this->respond(['ok' => false, 'message' => 'Vui lòng đợi 10 giây trước khi kiểm tra Meta lần tiếp theo.'], 429);
+        }
+        $_SESSION['ai_cs_meta_test_at'] = time();
+
+        try {
+            $result = $this->metaService->testConnection();
+            $this->auditService->record((int) $_SESSION['user_id'], 'meta_test_succeeded');
+            $this->respond(['ok' => true, ...$result]);
+        } catch (InvalidArgumentException $exception) {
+            $this->respond(['ok' => false, 'message' => $exception->getMessage()], 422);
+        } catch (PDOException $exception) {
+            $this->respond(['ok' => false, 'message' => 'Không thể kiểm tra kết nối Meta.'], 502);
+        } catch (RuntimeException $exception) {
+            $this->respond(['ok' => false, 'message' => $exception->getMessage()], 502);
         }
     }
 

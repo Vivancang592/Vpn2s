@@ -16,6 +16,7 @@ final class AiCustomerServiceAuditService
         'provider_generation_403' => 'Provider trả HTTP 403 khi tạo phản hồi AI; kiểm tra quyền model và số dư tài khoản. Không ghi nội dung chat hoặc bí mật.',
         'provider_generation_failed' => 'Provider không tạo được phản hồi AI; kiểm tra trạng thái kết nối và quyền model. Không ghi nội dung chat hoặc bí mật.',
         'meta_saved' => 'Đã cập nhật cấu hình Meta; không ghi giá trị bí mật.',
+        'meta_test_succeeded' => 'Kiểm tra kết nối Meta thành công; không ghi giá trị bí mật.',
         'runtime_updated' => 'Đã cập nhật trạng thái AI hoặc chat Website.',
         'retention_updated' => 'Đã bật hoặc tắt chính sách tự xóa hội thoại không hoạt động sau 7 ngày.',
         'conversation_retention_deleted' => 'Đã tự động xóa một hội thoại không hoạt động quá thời hạn lưu trữ; không ghi nội dung tin nhắn.',

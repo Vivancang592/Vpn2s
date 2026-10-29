@@ -131,12 +131,16 @@ ob_start();
                         <button type="button" class="text-btn small" data-open-settings="model">Cài đặt</button>
                     </li>
                     <li>
-                        <span class="task-dot <?= !empty($overviewMetaConfigured) ? 'warning' : 'danger' ?>"></span>
+                        <span class="task-dot <?= !empty($monitorMeta['connection_verified']) ? 'success' : (!empty($overviewMetaConfigured) ? 'warning' : 'danger') ?>" data-overview-meta-dot></span>
                         <div>
-                            <strong><?= !empty($overviewMetaConfigured)
-                                ? 'Fanpage đã đủ thông tin · chưa xác minh webhook'
-                                : 'Fanpage chưa đủ thông tin cấu hình' ?></strong>
-                            <small><?= !empty($overviewMetaConfigured) ? 'Cần xác nhận handshake Meta' : 'Kênh Facebook chưa sẵn sàng' ?></small>
+                            <strong data-overview-meta-status><?= !empty($monitorMeta['connection_verified'])
+                                ? 'Kết nối Page với Meta thành công'
+                                : (!empty($overviewMetaConfigured)
+                                    ? 'Fanpage đủ cấu hình · chưa kiểm tra kết nối Meta'
+                                    : 'Fanpage chưa đủ thông tin cấu hình') ?></strong>
+                            <small data-overview-meta-detail><?= !empty($monitorMeta['last_webhook_received_at'])
+                                ? 'Đã nhận sự kiện webhook: ' . htmlspecialchars((string) $monitorMeta['last_webhook_received_at'], ENT_QUOTES, 'UTF-8')
+                                : (!empty($overviewMetaConfigured) ? 'Kiểm tra Page ID và Page Access Token trong Cài đặt.' : 'Kênh Facebook chưa sẵn sàng') ?></small>
                         </div>
                         <button type="button" class="text-btn small" data-open-settings="fanpage">Cài đặt</button>
                     </li>
@@ -267,7 +271,9 @@ ob_start();
                     </div>
                     <div class="status-row">
                         <span>Fanpage</span>
-                        <strong data-monitor-meta><?= !empty($monitorMeta['configured']) ? 'Đủ thông tin cấu hình · chưa xác minh webhook' : 'Chưa đủ thông tin cấu hình' ?></strong>
+                        <strong data-monitor-meta><?= !empty($monitorMeta['connection_verified'])
+                            ? 'Kết nối Page với Meta thành công'
+                            : (!empty($monitorMeta['configured']) ? 'Đủ cấu hình · chưa kiểm tra kết nối Meta' : 'Chưa đủ thông tin cấu hình') ?></strong>
                     </div>
                 </div>
             </div>
@@ -497,7 +503,7 @@ ob_start();
                     </div>
                 </div>
                 <div class="setting-panel-actions">
-                    <button type="button" class="glass-btn tiny" data-settings-action="test" data-settings-group="fanpage">Kiểm tra cấu hình Fanpage</button>
+                    <button type="button" class="glass-btn tiny" data-settings-action="test" data-settings-group="fanpage">Kiểm tra kết nối Meta</button>
                     <button type="button" class="glass-btn primary tiny" data-settings-action="save" data-settings-group="fanpage">Lưu cấu hình Fanpage</button>
                 </div>
             </div>
@@ -2872,9 +2878,17 @@ ob_start();
             document.querySelector('[data-monitor-rule="ownership"]').textContent = monitorSettings.disable_on_handoff
                 ? 'Đang bật: AI không tự trả lời khi kỹ thuật viên tiếp quản hội thoại.'
                 : 'Chưa bật khóa phản hồi AI khi kỹ thuật viên tiếp quản.'
-            document.querySelector('[data-monitor-rule="meta"]').textContent = monitorMeta.configured
-                ? 'Đã lưu đủ App ID, Page ID và thông tin bí mật. Webhook chưa được hệ thống xác nhận handshake.'
-                : 'Chưa đủ cấu hình Meta để nhận sự kiện; trạng thái handshake chưa được xác minh.';
+            const webhookDetail = monitorMeta.last_webhook_received_at
+                ? ' Đã nhận webhook gần nhất: ' + monitorMeta.last_webhook_received_at + '.'
+                : ' Chưa ghi nhận sự kiện webhook hợp lệ.';
+            const metaDetail = monitorMeta.configured
+                ? (monitorMeta.connection_verified
+                    ? 'Page ID và Page Access Token đã được Meta xác thực.'
+                    : 'Đã lưu đủ thông tin; hãy kiểm tra kết nối Page với Meta.')
+                : 'Thiếu: ' + (Array.isArray(monitorMeta.missing_fields) && monitorMeta.missing_fields.length
+                    ? monitorMeta.missing_fields.join(', ')
+                    : 'thông tin cấu hình Meta') + '.';
+            document.querySelector('[data-monitor-rule="meta"]').textContent = metaDetail + webhookDetail;
             document.querySelector('[data-monitor-provider]').textContent = monitorProvider.configured
                 ? (monitorProvider.connection_verified
                     ? 'Đã kiểm tra kết nối ' + (monitorProvider.name || 'provider')
@@ -2892,9 +2906,33 @@ ob_start();
                     ? 'success'
                     : monitorProvider.configured ? 'warning' : 'danger');
             }
-            document.querySelector('[data-monitor-meta]').textContent = monitorMeta.configured
-                ? 'Đủ thông tin cấu hình · chưa xác minh webhook'
-                : 'Chưa đủ thông tin cấu hình';
+            document.querySelector('[data-monitor-meta]').textContent = monitorMeta.connection_verified
+                ? 'Kết nối Page với Meta thành công'
+                : monitorMeta.configured
+                    ? 'Đủ cấu hình · chưa kiểm tra kết nối Meta'
+                    : 'Thiếu: ' + (Array.isArray(monitorMeta.missing_fields) && monitorMeta.missing_fields.length
+                        ? monitorMeta.missing_fields.join(', ')
+                        : 'thông tin cấu hình');
+            const overviewMetaStatus = document.querySelector('[data-overview-meta-status]');
+            const overviewMetaDot = document.querySelector('[data-overview-meta-dot]');
+            const overviewMetaDetail = document.querySelector('[data-overview-meta-detail]');
+            if (overviewMetaStatus && overviewMetaDot && overviewMetaDetail) {
+                overviewMetaStatus.textContent = monitorMeta.connection_verified
+                    ? 'Kết nối Page với Meta thành công'
+                    : monitorMeta.configured
+                        ? 'Fanpage đủ cấu hình · chưa kiểm tra kết nối Meta'
+                        : 'Fanpage chưa đủ thông tin cấu hình';
+                overviewMetaDot.className = 'task-dot ' + (monitorMeta.connection_verified
+                    ? 'success'
+                    : monitorMeta.configured ? 'warning' : 'danger');
+                overviewMetaDetail.textContent = monitorMeta.last_webhook_received_at
+                    ? 'Đã nhận sự kiện webhook: ' + monitorMeta.last_webhook_received_at
+                    : monitorMeta.configured
+                        ? 'Kiểm tra Page ID và Page Access Token trong Cài đặt.'
+                        : 'Thiếu: ' + (Array.isArray(monitorMeta.missing_fields) && monitorMeta.missing_fields.length
+                            ? monitorMeta.missing_fields.join(', ')
+                            : 'thông tin cấu hình Meta');
+            }
         }
         function renderMonitorCounts(stats) {
             for (const [key, value] of Object.entries(stats)) {
@@ -3696,23 +3734,20 @@ ob_start();
                     }
                     return;
                 } else if (group === 'fanpage') {
-                    const appId = panel.querySelector('[name="meta_app_id"]').value.trim();
-                    const appSecret = panel.querySelector('[name="meta_app_secret"]').value.trim();
-                    const pageId = panel.querySelector('[name="meta_page_id"]').value.trim();
-                    const verifyToken = panel.querySelector('[name="verify_token"]').value.trim();
-                    const pageAccessToken = panel.querySelector('[name="page_access_token"]').value.trim();
-                    const hasMessagesEvent = panel.querySelector('[name="webhook_events[]"][value="messages"]').checked;
-                    valid = /^\d+$/.test(appId) && (Boolean(appSecret) || providerSettings.meta_app_secret_configured)
-                        && /^\d+$/.test(pageId)
-                        && (Boolean(verifyToken) || providerSettings.verify_token_configured)
-                        && (Boolean(pageAccessToken) || providerSettings.page_access_token_configured)
-                        && hasMessagesEvent;
-                    message = valid
-                        ? 'Các trường Fanpage đã đủ định dạng cơ bản. Cần xác minh handshake webhook và chữ ký bằng Meta trước khi vận hành.'
-                        : 'Kiểm tra App ID/Page ID dạng số, bí mật đã cấu hình hoặc nhập mới, và chọn sự kiện messages.';
-                    result = valid
-                        ? 'Định dạng cơ bản hợp lệ; chưa gửi yêu cầu hoặc xác minh với Meta.'
-                        : 'Thiếu trường hoặc sai định dạng; không gọi dịch vụ.';
+                    button.disabled = true;
+                    try {
+                        const response = await sendAdminPost('/admin/ai-customer-service/meta-test', {});
+                        notify(response.message);
+                        recordAudit('Kiểm tra ' + settingsGroupLabels[group], 'Meta đã xác thực Page ID và Page Access Token; giá trị bí mật không được ghi vào nhật ký.');
+                    } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Không thể kiểm tra kết nối Meta.';
+                        notify(errorMessage);
+                        recordAudit('Kiểm tra ' + settingsGroupLabels[group], errorMessage);
+                    } finally {
+                        await refreshMonitorStatus(true);
+                        button.disabled = false;
+                    }
+                    return;
                 } else if (group === 'rules') {
                     const selectedTriggers = panel.querySelectorAll('[name="handoff_triggers[]"]:checked').length;
                     valid = selectedTriggers > 0 && panel.querySelector('[name="disable_on_handoff"]').checked;

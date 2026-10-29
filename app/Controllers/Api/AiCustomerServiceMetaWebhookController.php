@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\Api;
 
 use App\Services\AiCustomerServiceMetaService;
+use App\Services\AiCustomerServiceWebsiteChatService;
 use DomainException;
 use InvalidArgumentException;
 use RuntimeException;
@@ -46,8 +47,7 @@ final class AiCustomerServiceMetaWebhookController
         }
 
         try {
-            $this->meta->receiveWebhook($rawBody, $signature);
-            $this->respond('EVENT_RECEIVED', 200);
+            $result = $this->meta->receiveWebhook($rawBody, $signature);
         } catch (DomainException) {
             $this->respond('Invalid signature', 403);
         } catch (InvalidArgumentException) {
@@ -55,6 +55,35 @@ final class AiCustomerServiceMetaWebhookController
         } catch (RuntimeException) {
             $this->respond('Unable to process event', 503);
         }
+
+        $this->respondAndContinue('EVENT_RECEIVED', 200);
+        set_time_limit(0);
+        $chat = new AiCustomerServiceWebsiteChatService();
+        foreach ($result['conversation_ids'] ?? [] as $conversationId) {
+            if (is_int($conversationId) && $conversationId > 0) {
+                $chat->respondToUnansweredCustomerMessage($conversationId);
+            }
+        }
+    }
+
+    private function respondAndContinue(string $body, int $status): void
+    {
+        ignore_user_abort(true);
+        http_response_code($status);
+        header('Content-Type: text/plain; charset=utf-8');
+        header('Cache-Control: no-store');
+        echo $body;
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+            return;
+        }
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+        flush();
     }
 
     private function respond(string $body, int $status): void

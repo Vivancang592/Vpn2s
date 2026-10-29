@@ -93,7 +93,7 @@ final class AiConversation extends BaseModel
     {
         $stmt = self::$db->prepare('
             INSERT INTO `vc_ai_conversations` (channel, external_id, state)
-            VALUES (\'facebook\', :external_id, \'waiting\')
+            VALUES (\'facebook\', :external_id, \'ai_active\')
             ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
         ');
         $stmt->execute(['external_id' => $externalId]);
@@ -117,12 +117,41 @@ final class AiConversation extends BaseModel
             'content' => $content,
         ]);
         $this->touchConversation($conversationId);
-        $state = self::$db->prepare('
-            UPDATE `vc_ai_conversations`
-            SET state = \'waiting\'
-            WHERE id = :id AND state = \'ai_active\'
+    }
+
+    public function activateFacebookConversationForAi(int $conversationId): void
+    {
+        $conversation = $this->findForUpdate($conversationId);
+        if ($conversation === null || $conversation['channel'] !== 'facebook') {
+            throw new \RuntimeException('Không thể tải hội thoại Facebook.');
+        }
+        if (!in_array($conversation['state'], ['waiting', 'error'], true)) {
+            return;
+        }
+        if ($conversation['state'] === 'waiting' && $this->hasPendingCustomerHandoff($conversationId)) {
+            return;
+        }
+        $this->updateState(
+            $conversationId,
+            (string) $conversation['state'],
+            'ai_active',
+            null,
+            'system',
+            'facebook_inbound_message'
+        );
+    }
+
+    public function facebookConversationIdForMessage(string $externalMessageId): ?int
+    {
+        $stmt = self::$db->prepare('
+            SELECT conversation_id
+            FROM `vc_ai_messages`
+            WHERE channel = \'facebook\' AND external_message_id = :external_message_id
+            LIMIT 1
         ');
-        $state->execute(['id' => $conversationId]);
+        $stmt->execute(['external_message_id' => $externalMessageId]);
+        $conversationId = $stmt->fetchColumn();
+        return $conversationId === false ? null : (int) $conversationId;
     }
 
     public function hasRecentFacebookInbound(int $conversationId): bool

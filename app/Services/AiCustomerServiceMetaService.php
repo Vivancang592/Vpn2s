@@ -29,14 +29,21 @@ final class AiCustomerServiceMetaService
 
     public function settingsForAdmin(): array
     {
-        return [
+        $settings = [
             'meta_app_id' => $this->settings->getByKey('ai_cs_meta_app_id') ?? '',
             'meta_page_id' => $this->settings->getByKey('ai_cs_meta_page_id') ?? '',
             'meta_app_secret_configured' => $this->isConfigured('ai_cs_meta_app_secret_encrypted'),
             'verify_token_configured' => $this->isConfigured('ai_cs_meta_verify_token_encrypted'),
             'page_access_token_configured' => $this->isConfigured('ai_cs_meta_page_access_token_encrypted'),
             'secret_storage_ready' => $this->vault->isReady(),
+            'connection_verified_at' => $this->settings->getByKey('ai_cs_meta_connection_verified_at') ?? '',
+            'last_webhook_received_at' => $this->settings->getByKey('ai_cs_meta_last_webhook_received_at') ?? '',
         ];
+        $settings['missing_fields'] = $this->missingConfigurationFields($settings);
+        $settings['configured'] = $settings['missing_fields'] === [];
+        $settings['connection_verified'] = $settings['configured'] && $settings['connection_verified_at'] !== '';
+
+        return $settings;
     }
 
     public function saveConfiguration(array $input, int $adminId): array
@@ -92,6 +99,8 @@ final class AiCustomerServiceMetaService
             foreach ($encrypted as $key => $value) {
                 $this->settings->setByKey($key, $value);
             }
+            $this->settings->setByKey('ai_cs_meta_connection_verified_at', '');
+            $this->settings->setByKey('ai_cs_meta_last_webhook_received_at', '');
             $this->audit->record($adminId, 'meta_saved');
             $pdo->commit();
         } catch (PDOException $exception) {
@@ -101,6 +110,103 @@ final class AiCustomerServiceMetaService
             throw new RuntimeException('Không thể lưu cấu hình Meta.', 0, $exception);
         }
         return $this->settingsForAdmin();
+    }
+
+    public function testConnection(): array
+    {
+        $settings = $this->settingsForAdmin();
+        if ($settings['missing_fields'] !== []) {
+            throw new InvalidArgumentException(
+                'Thiếu cấu hình Fanpage: ' . implode(', ', $settings['missing_fields']) . '.'
+            );
+        }
+        if (!$this->settings->setByKey('ai_cs_meta_connection_verified_at', '')) {
+            throw new RuntimeException('Không thể cập nhật trạng thái kiểm tra kết nối Meta.');
+        }
+
+        $pageId = (string) $settings['meta_page_id'];
+        $pageToken = $this->vault->decrypt($this->settings->getByKey('ai_cs_meta_page_access_token_encrypted'));
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('Máy chủ chưa bật cURL; không thể kiểm tra kết nối Meta.');
+        }
+
+        $body = '';
+        $url = 'https://graph.facebook.com/v26.0/' . rawurlencode($pageId) . '?fields=id';
+        $handle = curl_init($url);
+        if ($handle === false) {
+            throw new RuntimeException('Không thể khởi tạo kết nối tới Meta.');
+        }
+        try {
+            $options = [
+                CURLOPT_RETURNTRANSFER => false,
+                CURLOPT_HTTPGET => true,
+                CURLOPT_HTTPHEADER => [
+                    'Accept: application/json',
+                    'Authorization: Bearer ' . $pageToken,
+                ],
+                CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_CONNECTTIMEOUT => 3,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+                CURLOPT_WRITEFUNCTION => static function ($handle, string $chunk) use (&$body): int {
+                    if (strlen($body) + strlen($chunk) > 32768) {
+                        return 0;
+                    }
+                    $body .= $chunk;
+                    return strlen($chunk);
+                },
+            ];
+            if (!curl_setopt_array($handle, $options)) {
+                throw new RuntimeException('Không thể cấu hình kết nối tới Meta.');
+            }
+            $success = curl_exec($handle);
+            $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+            $curlError = $success === false ? curl_error($handle) : '';
+        } finally {
+            curl_close($handle);
+        }
+
+        if ($success === false || $status < 200 || $status >= 300) {
+            $errorMessage = '';
+            try {
+                $response = json_decode($body, true, 16, JSON_THROW_ON_ERROR);
+                $errorMessage = is_string($response['error']['message'] ?? null)
+                    ? trim($response['error']['message'])
+                    : '';
+            } catch (\JsonException) {
+                $errorMessage = '';
+            }
+            $this->settings->setByKey('ai_cs_meta_connection_verified_at', '');
+            if ($errorMessage !== '') {
+                throw new RuntimeException('Meta từ chối kiểm tra Page Access Token: ' . substr($errorMessage, 0, 400));
+            }
+            if ($curlError !== '') {
+                throw new RuntimeException('Không kết nối được tới Meta: ' . substr($curlError, 0, 300));
+            }
+            throw new RuntimeException('Meta từ chối Page ID hoặc Page Access Token (HTTP ' . $status . ').');
+        }
+
+        try {
+            $response = json_decode($body, true, 16, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            $this->settings->setByKey('ai_cs_meta_connection_verified_at', '');
+            throw new RuntimeException('Meta trả về phản hồi kiểm tra kết nối không hợp lệ.');
+        }
+        if (!is_array($response) || (string) ($response['id'] ?? '') !== $pageId) {
+            $this->settings->setByKey('ai_cs_meta_connection_verified_at', '');
+            throw new RuntimeException('Page Access Token không khớp với Page ID đã lưu.');
+        }
+
+        $verifiedAt = date('Y-m-d H:i:s');
+        if (!$this->settings->setByKey('ai_cs_meta_connection_verified_at', $verifiedAt)) {
+            throw new RuntimeException('Không thể lưu trạng thái kiểm tra kết nối Meta.');
+        }
+        return [
+            'message' => 'Kết nối Meta thành công; Page ID và Page Access Token hợp lệ.',
+            'connection_verified_at' => $verifiedAt,
+        ];
     }
 
     public function verifyWebhookHandshake(?string $mode, ?string $verifyToken, ?string $challenge): string
@@ -151,12 +257,20 @@ final class AiCustomerServiceMetaService
         $accepted = 0;
         $duplicates = 0;
         $eventCount = 0;
+        $conversationIds = [];
+        $webhookPageConfirmed = false;
         foreach ($payload['entry'] as $entry) {
             if (!is_array($entry) || !is_array($entry['messaging'] ?? null)) {
                 continue;
             }
             if (isset($entry['id']) && (string) $entry['id'] !== $pageId) {
                 continue;
+            }
+            if (!$webhookPageConfirmed && (string) ($entry['id'] ?? '') === $pageId) {
+                if (!$this->settings->setByKey('ai_cs_meta_last_webhook_received_at', date('Y-m-d H:i:s'))) {
+                    throw new RuntimeException('Không thể ghi nhận sự kiện webhook Meta.');
+                }
+                $webhookPageConfirmed = true;
             }
             foreach ($entry['messaging'] as $event) {
                 if (++$eventCount > 100) {
@@ -194,8 +308,10 @@ final class AiCustomerServiceMetaService
                         $message['mid'],
                         $content
                     );
+                    $this->conversations->activateFacebookConversationForAi((int) $conversation['id']);
                     $pdo->commit();
                     $accepted++;
+                    $conversationIds[] = (int) $conversation['id'];
                 } catch (PDOException $exception) {
                     if ($pdo->inTransaction()) {
                         $pdo->rollBack();
@@ -204,6 +320,24 @@ final class AiCustomerServiceMetaService
                         try {
                             if ($this->conversations->externalMessageExists('facebook', $message['mid'])) {
                                 $duplicates++;
+                                $duplicateConversationId = $this->conversations->facebookConversationIdForMessage($message['mid']);
+                                if ($duplicateConversationId !== null) {
+                                    try {
+                                        $pdo->beginTransaction();
+                                        $this->conversations->activateFacebookConversationForAi($duplicateConversationId);
+                                        $pdo->commit();
+                                    } catch (PDOException | RuntimeException $lookupException) {
+                                        if ($pdo->inTransaction()) {
+                                            $pdo->rollBack();
+                                        }
+                                        throw new RuntimeException(
+                                            'Không thể khôi phục xử lý hội thoại Facebook.',
+                                            0,
+                                            $lookupException
+                                        );
+                                    }
+                                    $conversationIds[] = $duplicateConversationId;
+                                }
                                 continue;
                             }
                         } catch (PDOException $lookupException) {
@@ -221,7 +355,11 @@ final class AiCustomerServiceMetaService
             }
         }
 
-        return ['accepted' => $accepted, 'duplicates' => $duplicates];
+        return [
+            'accepted' => $accepted,
+            'duplicates' => $duplicates,
+            'conversation_ids' => array_values(array_unique($conversationIds)),
+        ];
     }
 
     public function sendReply(string $pageScopedId, string $content, int $conversationId): string
@@ -304,5 +442,29 @@ final class AiCustomerServiceMetaService
     {
         $value = $this->settings->getByKey($key);
         return is_string($value) && $value !== '';
+    }
+
+    private function missingConfigurationFields(array $settings): array
+    {
+        $required = [
+            'meta_app_id' => 'Meta App ID',
+            'meta_page_id' => 'Page ID',
+            'meta_app_secret_configured' => 'Meta App Secret',
+            'verify_token_configured' => 'Verify Token',
+            'page_access_token_configured' => 'Page Access Token',
+            'secret_storage_ready' => 'khóa mã hóa bí mật',
+        ];
+        $missing = [];
+        foreach ($required as $key => $label) {
+            $configured = match ($key) {
+                'meta_app_id' => preg_match('/^[0-9]{5,24}$/', (string) ($settings[$key] ?? '')) === 1,
+                'meta_page_id' => preg_match('/^[0-9]{5,32}$/', (string) ($settings[$key] ?? '')) === 1,
+                default => !empty($settings[$key]),
+            };
+            if (!$configured) {
+                $missing[] = $label;
+            }
+        }
+        return $missing;
     }
 }
