@@ -125,7 +125,8 @@ final class AiConversation extends BaseModel
         if ($conversation === null || $conversation['channel'] !== 'facebook') {
             throw new \RuntimeException('Không thể tải hội thoại Facebook.');
         }
-        if (!in_array($conversation['state'], ['waiting', 'error'], true)) {
+        if ($conversation['handoff_staff_id'] !== null
+            || !in_array($conversation['state'], ['waiting', 'error'], true)) {
             return;
         }
         if ($conversation['state'] === 'waiting' && $this->hasPendingCustomerHandoff($conversationId)) {
