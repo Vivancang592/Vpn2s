@@ -451,7 +451,9 @@ final class AiCustomerServiceMetaService
             throw new AiCustomerServiceMetaApiException(
                 $status,
                 $this->graphErrorNumber($error['code'] ?? null, 2_147_483_647),
-                $this->graphErrorNumber($error['error_subcode'] ?? null, 2_147_483_647)
+                $this->graphErrorNumber($error['error_subcode'] ?? null, 2_147_483_647),
+                $this->graphErrorSummary($error['message'] ?? null),
+                $this->safeFbtraceId($error['fbtrace_id'] ?? null)
             );
         }
         if ($success === false) {
@@ -482,6 +484,40 @@ final class AiCustomerServiceMetaService
         }
         $number = (int) $value;
         return $number <= $maximum ? $number : null;
+    }
+
+    private function graphErrorSummary(mixed $message): ?string
+    {
+        if (!is_string($message)) {
+            return null;
+        }
+
+        $message = strtolower($message);
+        if (preg_match('/recipient|\\bpsid\\b|user id/', $message) === 1) {
+            return 'meta_recipient_invalid';
+        }
+        if (preg_match('/permission|access token|not authorized|unauthorized/', $message) === 1) {
+            return 'meta_permission_denied';
+        }
+        if (preg_match('/24.?hour|messaging window|outside.*window|policy/', $message) === 1) {
+            return 'meta_window_policy';
+        }
+        if (preg_match('/content|message type|unsupported.*(message|attachment)|invalid.*(text|attachment)/', $message) === 1) {
+            return 'meta_content_invalid';
+        }
+        if (preg_match('/parameter|\\bparam\\b|invalid request|invalid.*field/', $message) === 1) {
+            return 'meta_parameter_invalid';
+        }
+
+        return null;
+    }
+
+    private function safeFbtraceId(mixed $value): ?string
+    {
+        if (!is_string($value) || preg_match('/^[A-Za-z0-9_-]{1,128}$/', $value) !== 1) {
+            return null;
+        }
+        return $value;
     }
 
     private function isConfigured(string $key): bool

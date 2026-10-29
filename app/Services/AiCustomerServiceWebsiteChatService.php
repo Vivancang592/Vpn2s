@@ -178,12 +178,20 @@ final class AiCustomerServiceWebsiteChatService
             $metaErrorSubcode = $exception instanceof AiCustomerServiceMetaApiException
                 ? $exception->graphErrorSubcode
                 : null;
+            $metaErrorSummary = $exception instanceof AiCustomerServiceMetaApiException
+                ? $exception->graphErrorSummary
+                : null;
+            $fbtraceId = $exception instanceof AiCustomerServiceMetaApiException
+                ? $exception->fbtraceId
+                : null;
             $this->audit->record(
                 null,
                 'resume_reply_failed',
                 $this->diagnosticCodeForFailure($failureStage, $exception),
                 $metaErrorCode,
-                $metaErrorSubcode
+                $metaErrorSubcode,
+                $metaErrorSummary,
+                $fbtraceId
             );
             return 'failed';
         }

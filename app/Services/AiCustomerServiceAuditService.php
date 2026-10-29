@@ -25,6 +25,11 @@ final class AiCustomerServiceAuditService
         'meta_http_4xx' => 'Meta từ chối yêu cầu gửi tin; kiểm tra Page Access Token, quyền và trạng thái Page.',
         'meta_http_5xx' => 'Meta gặp lỗi máy chủ khi gửi tin; có thể thử lại sau.',
         'meta_connection_error' => 'Không kết nối được tới Meta để gửi tin.',
+        'meta_recipient_invalid' => 'Thông báo Meta cho biết người nhận/PSID có thể không hợp lệ hoặc không nhận được tin.',
+        'meta_permission_denied' => 'Thông báo Meta cho biết thiếu quyền hoặc không được phép gửi tin.',
+        'meta_window_policy' => 'Thông báo Meta liên quan đến cửa sổ nhắn tin hoặc chính sách gửi tin.',
+        'meta_content_invalid' => 'Thông báo Meta cho biết định dạng hoặc nội dung tin nhắn không được hỗ trợ.',
+        'meta_parameter_invalid' => 'Thông báo Meta cho biết một tham số của yêu cầu không hợp lệ.',
         'database_error' => 'Lỗi lưu dữ liệu hội thoại trong cơ sở dữ liệu.',
         'conversation_changed' => 'Hội thoại đã đổi trạng thái hoặc có tin mới trước khi AI hoàn tất.',
         'ai_paused' => 'AI đang tạm dừng.',
@@ -64,7 +69,9 @@ final class AiCustomerServiceAuditService
         string $event,
         ?string $diagnosticCode = null,
         ?int $metaErrorCode = null,
-        ?int $metaErrorSubcode = null
+        ?int $metaErrorSubcode = null,
+        ?string $metaErrorSummary = null,
+        ?string $fbtraceId = null
     ): void
     {
         if (!isset(self::EVENTS[$event]) || ($adminId !== null && $adminId < 1)) {
@@ -73,6 +80,12 @@ final class AiCustomerServiceAuditService
         if (($metaErrorCode !== null && ($metaErrorCode < 0 || $metaErrorCode > 2_147_483_647))
             || ($metaErrorSubcode !== null && ($metaErrorSubcode < 0 || $metaErrorSubcode > 2_147_483_647))) {
             throw new InvalidArgumentException('Mã lỗi Meta không hợp lệ.');
+        }
+        if ($metaErrorSummary !== null && !isset(self::DIAGNOSTICS[$metaErrorSummary])) {
+            throw new InvalidArgumentException('Phân loại lỗi Meta không hợp lệ.');
+        }
+        if ($fbtraceId !== null && preg_match('/^[A-Za-z0-9_-]{1,128}$/', $fbtraceId) !== 1) {
+            throw new InvalidArgumentException('Mã truy vết Meta không hợp lệ.');
         }
 
         $description = self::EVENTS[$event];
@@ -88,6 +101,12 @@ final class AiCustomerServiceAuditService
                 . '; mã phụ: '
                 . ($metaErrorSubcode === null ? 'không có' : (string) $metaErrorSubcode)
                 . '.';
+        }
+        if ($metaErrorSummary !== null) {
+            $description .= ' Chi tiết Meta: ' . self::DIAGNOSTICS[$metaErrorSummary];
+        }
+        if ($fbtraceId !== null) {
+            $description .= ' fbtrace_id: ' . $fbtraceId . '.';
         }
 
         $created = (new SystemLog())->create([
