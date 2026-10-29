@@ -9,6 +9,30 @@ use InvalidArgumentException;
 
 final class AiCustomerServiceAuditService
 {
+    private const DIAGNOSTICS = [
+        'provider_unavailable' => 'Provider AI chưa có API Key, model cụ thể hoặc kho bí mật hợp lệ.',
+        'provider_http_400' => 'Provider AI từ chối yêu cầu; kiểm tra model và định dạng yêu cầu.',
+        'provider_http_401' => 'Provider AI trả HTTP 401; kiểm tra API Key.',
+        'provider_http_403' => 'Provider AI trả HTTP 403; kiểm tra quyền model hoặc tài khoản provider.',
+        'provider_rate_limited' => 'Provider AI giới hạn yêu cầu (HTTP 408/429); thử lại sau.',
+        'provider_server_error' => 'Provider AI hoặc mạng trung gian trả lỗi máy chủ/tạm thời.',
+        'provider_connection_error' => 'Không kết nối được tới provider AI hoặc phản hồi không hợp lệ.',
+        'meta_window_expired' => 'Không thể gửi qua Meta vì cửa sổ phản hồi Messenger đã hết hạn.',
+        'meta_http_400' => 'Meta từ chối dữ liệu gửi tin (HTTP 400); kiểm tra người nhận hoặc nội dung.',
+        'meta_http_401' => 'Meta từ chối Page Access Token (HTTP 401).',
+        'meta_http_403' => 'Meta từ chối quyền gửi tin của Page (HTTP 403).',
+        'meta_rate_limited' => 'Meta giới hạn yêu cầu gửi tin (HTTP 429); thử lại sau.',
+        'meta_http_4xx' => 'Meta từ chối yêu cầu gửi tin; kiểm tra Page Access Token, quyền và trạng thái Page.',
+        'meta_http_5xx' => 'Meta gặp lỗi máy chủ khi gửi tin; có thể thử lại sau.',
+        'meta_connection_error' => 'Không kết nối được tới Meta để gửi tin.',
+        'database_error' => 'Lỗi lưu dữ liệu hội thoại trong cơ sở dữ liệu.',
+        'conversation_changed' => 'Hội thoại đã đổi trạng thái hoặc có tin mới trước khi AI hoàn tất.',
+        'ai_paused' => 'AI đang tạm dừng.',
+        'invalid_signature' => 'Meta gửi webhook có chữ ký không hợp lệ; kiểm tra App Secret đã lưu và cấu hình ứng dụng Meta.',
+        'invalid_payload' => 'Webhook bị từ chối do payload không đúng cấu trúc Page/Messenger.',
+        'unexpected_failure' => 'Xử lý phản hồi tự động dừng do lỗi nội bộ; kiểm tra nhật ký PHP của máy chủ.',
+    ];
+
     private const EVENTS = [
         'provider_saved' => 'Đã cập nhật cấu hình provider; không ghi giá trị bí mật.',
         'provider_test_succeeded' => 'Kiểm tra kết nối provider thành công; không ghi nội dung phản hồi.',
@@ -19,6 +43,7 @@ final class AiCustomerServiceAuditService
         'facebook_auto_reply_sent' => 'Nhân viên AI đã gửi phản hồi tự động cho hội thoại Facebook.',
         'facebook_auto_reply_skipped' => 'Không gửi phản hồi tự động Facebook do trạng thái hội thoại, AI hoặc cấu hình provider; kiểm tra hộp thư và trạng thái AI.',
         'facebook_auto_reply_failed' => 'Xử lý phản hồi tự động Facebook gặp lỗi; kiểm tra nhật ký hệ thống và cấu hình provider/Meta. Không ghi nội dung chat hoặc bí mật.',
+        'facebook_webhook_rejected' => 'Webhook Facebook bị từ chối trước khi đưa tin nhắn vào hội thoại.',
         'meta_saved' => 'Đã cập nhật cấu hình Meta; không ghi giá trị bí mật.',
         'meta_test_succeeded' => 'Kiểm tra kết nối Meta thành công; không ghi giá trị bí mật.',
         'runtime_updated' => 'Đã cập nhật trạng thái AI hoặc chat Website.',
@@ -34,16 +59,24 @@ final class AiCustomerServiceAuditService
         'conversation_deleted' => 'Quản trị viên đã xóa toàn bộ một hội thoại; không ghi nội dung tin nhắn.',
     ];
 
-    public function record(?int $adminId, string $event): void
+    public function record(?int $adminId, string $event, ?string $diagnosticCode = null): void
     {
         if (!isset(self::EVENTS[$event]) || ($adminId !== null && $adminId < 1)) {
             throw new InvalidArgumentException('Sự kiện audit không hợp lệ.');
         }
 
+        $description = self::EVENTS[$event];
+        if ($diagnosticCode !== null) {
+            if (!isset(self::DIAGNOSTICS[$diagnosticCode])) {
+                throw new InvalidArgumentException('Mã chẩn đoán audit không hợp lệ.');
+            }
+            $description .= ' Nguyên nhân: ' . self::DIAGNOSTICS[$diagnosticCode];
+        }
+
         $created = (new SystemLog())->create([
             'user_id' => $adminId,
             'action' => 'AI Customer Service',
-            'description' => self::EVENTS[$event],
+            'description' => $description,
             'ip_address' => null,
             'created_at' => date('Y-m-d H:i:s'),
         ]);

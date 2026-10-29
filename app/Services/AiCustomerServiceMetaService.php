@@ -440,11 +440,16 @@ final class AiCustomerServiceMetaService
             }
             $success = curl_exec($handle);
             $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+            $curlError = $success === false ? curl_error($handle) : '';
         } finally {
             curl_close($handle);
         }
         if ($success === false || $status < 200 || $status >= 300) {
-            throw new RuntimeException('Meta không nhận tin nhắn. Kiểm tra quyền Page và trạng thái hội thoại.');
+            $errorCode = $status >= 400 && $status <= 599 ? $status : 0;
+            $message = $curlError !== ''
+                ? 'Không kết nối được tới Meta để gửi tin nhắn.'
+                : 'Meta không nhận tin nhắn. Kiểm tra quyền Page và trạng thái hội thoại.';
+            throw new RuntimeException($message, $errorCode);
         }
         try {
             $result = json_decode($body, true, 32, JSON_THROW_ON_ERROR);

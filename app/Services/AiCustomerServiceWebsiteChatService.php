@@ -64,7 +64,7 @@ final class AiCustomerServiceWebsiteChatService
             || $providerSettings['model'] === ''
             || $providerSettings['model'] === 'auto') {
             $this->markAiResponseError($conversationId);
-            $this->audit->record(null, 'provider_generation_failed');
+            $this->audit->record(null, 'provider_generation_failed', 'provider_unavailable');
             return 'provider_unavailable';
         }
 
@@ -72,6 +72,7 @@ final class AiCustomerServiceWebsiteChatService
             ? $this->imagePathForMessage((int) $latestMessage['id'])
             : null;
         $imageGenerationAttempted = false;
+        $failureStage = 'provider';
         try {
             if ($imagePath !== null && ($this->provider->configuredModelSupportsImages() === false
                 || !$this->isVisionImage($imagePath))) {
@@ -92,6 +93,7 @@ final class AiCustomerServiceWebsiteChatService
                 $this->promptMessages($conversationId, $imagePath),
                 2048
             );
+            $failureStage = 'database';
             $pdo = BaseModel::getPdo();
             $pdo->beginTransaction();
             $locked = $this->conversations->findForUpdate($conversationId);
@@ -119,6 +121,7 @@ final class AiCustomerServiceWebsiteChatService
             $externalMessageId = null;
             $replyContent = $generated['content'];
             if ($locked['channel'] === 'facebook') {
+                $failureStage = 'meta';
                 preg_match('/^.{0,2000}/us', $replyContent, $replyMatch);
                 $replyContent = trim($replyMatch[0] ?? '');
                 if ($replyContent === '') {
@@ -130,6 +133,7 @@ final class AiCustomerServiceWebsiteChatService
                     $conversationId
                 );
             }
+            $failureStage = 'database';
             $this->conversations->addAiMessage(
                 $conversationId,
                 $replyContent,
@@ -147,9 +151,9 @@ final class AiCustomerServiceWebsiteChatService
                 $pdo->rollBack();
             }
             $this->markAiResponseError($conversationId);
-            $this->audit->record(null, 'resume_reply_failed');
-            throw new RuntimeException('Không thể lưu phản hồi AI.', 0, $exception);
-        } catch (RuntimeException | \DomainException $exception) {
+            $this->audit->record(null, 'resume_reply_failed', 'database_error');
+            return 'failed';
+        } catch (\Throwable $exception) {
             if (isset($pdo) && $pdo->inTransaction()) {
                 $pdo->rollBack();
             }
@@ -168,9 +172,48 @@ final class AiCustomerServiceWebsiteChatService
                 return 'image_handoff';
             }
             $this->markAiResponseError($conversationId);
-            $this->audit->record(null, 'resume_reply_failed');
+            $this->audit->record(
+                null,
+                'resume_reply_failed',
+                $this->diagnosticCodeForFailure($failureStage, $exception)
+            );
             return 'failed';
         }
+    }
+
+    private function diagnosticCodeForFailure(string $stage, \Throwable $exception): string
+    {
+        if ($stage === 'meta' && $exception instanceof \DomainException
+            && str_contains(strtolower($exception->getMessage()), '24 giờ')) {
+            return 'meta_window_expired';
+        }
+        if ($stage === 'meta') {
+            if ($exception->getCode() >= 500) {
+                return 'meta_http_5xx';
+            }
+            if ($exception->getCode() === 429) {
+                return 'meta_rate_limited';
+            }
+            if (in_array($exception->getCode(), [400, 401, 403], true)) {
+                return 'meta_http_' . $exception->getCode();
+            }
+            return $exception->getCode() >= 400 ? 'meta_http_4xx' : 'meta_connection_error';
+        }
+        if ($stage === 'database') {
+            return 'database_error';
+        }
+        if ($exception->getCode() >= 500) {
+            return 'provider_server_error';
+        }
+        return match ($exception->getCode()) {
+            400 => 'provider_http_400',
+            401 => 'provider_http_401',
+            403 => 'provider_http_403',
+            408, 429 => 'provider_rate_limited',
+            default => $exception instanceof \DomainException
+                ? 'conversation_changed'
+                : 'provider_connection_error',
+        };
     }
 
     public function recentMessages(string $externalId): array

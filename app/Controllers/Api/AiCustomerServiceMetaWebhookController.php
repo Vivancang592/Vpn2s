@@ -45,16 +45,20 @@ final class AiCustomerServiceMetaWebhookController
         }
         $signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
         if (!is_string($signature)) {
+            (new AiCustomerServiceAuditService())->record(null, 'facebook_webhook_rejected', 'invalid_signature');
             $this->respond('Invalid signature', 403);
         }
 
         try {
             $result = $this->meta->receiveWebhook($rawBody, $signature);
         } catch (DomainException) {
+            (new AiCustomerServiceAuditService())->record(null, 'facebook_webhook_rejected', 'invalid_signature');
             $this->respond('Invalid signature', 403);
         } catch (InvalidArgumentException) {
+            (new AiCustomerServiceAuditService())->record(null, 'facebook_webhook_rejected', 'invalid_payload');
             $this->respond('Invalid payload', 400);
         } catch (RuntimeException) {
+            (new AiCustomerServiceAuditService())->record(null, 'facebook_webhook_rejected', 'unexpected_failure');
             $this->respond('Unable to process event', 503);
         }
 
@@ -68,11 +72,21 @@ final class AiCustomerServiceMetaWebhookController
                     $replyStatus = $chat->respondToUnansweredCustomerMessage($conversationId);
                     if ($replyStatus === 'replied') {
                         $audit->record(null, 'facebook_auto_reply_sent');
-                    } elseif (!in_array($replyStatus, ['already_answered', 'no_pending'], true)) {
-                        $audit->record(null, 'facebook_auto_reply_skipped');
+                    } elseif (in_array(
+                        $replyStatus,
+                        ['already_answered', 'no_pending', 'failed', 'provider_unavailable', 'image_handoff'],
+                        true
+                    )) {
+                        continue;
+                    } elseif ($replyStatus === 'paused') {
+                        $audit->record(null, 'facebook_auto_reply_skipped', 'ai_paused');
+                    } elseif (in_array($replyStatus, ['not_ready', 'new_message_pending'], true)) {
+                        $audit->record(null, 'facebook_auto_reply_skipped', 'conversation_changed');
+                    } else {
+                        $audit->record(null, 'facebook_auto_reply_skipped', 'unexpected_failure');
                     }
-                } catch (PDOException | RuntimeException) {
-                    $audit->record(null, 'facebook_auto_reply_failed');
+                } catch (\Throwable) {
+                    $audit->record(null, 'facebook_auto_reply_failed', 'unexpected_failure');
                 }
             }
         }
