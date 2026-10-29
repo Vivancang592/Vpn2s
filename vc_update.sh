@@ -84,6 +84,18 @@ if [ -f "$APP_PATH/.env" ] && [ -d "$MIGRATIONS_DIR" ]; then
     . "$APP_PATH/.env"
     set +a
 
+    if ! grep -q '^AI_CUSTOMER_SERVICE_ENCRYPTION_KEY=.' "$APP_PATH/.env"; then
+        AI_CS_ENCRYPTION_KEY="$(php -r 'echo base64_encode(random_bytes(32));')"
+        printf '\n# Khóa mã hóa bí mật AI Customer Service — giữ nguyên và sao lưu an toàn\nAI_CUSTOMER_SERVICE_ENCRYPTION_KEY=%s\n' \
+            "$AI_CS_ENCRYPTION_KEY" >> "$APP_PATH/.env"
+        unset AI_CS_ENCRYPTION_KEY
+        chmod 640 "$APP_PATH/.env"
+        echo -e " ${GREEN}✔ Đã tạo khóa mã hóa AI Customer Service trong .env.${NC}"
+    elif ! php -r '$key = getenv("AI_CUSTOMER_SERVICE_ENCRYPTION_KEY"); $decoded = is_string($key) ? base64_decode($key, true) : false; exit(is_string($decoded) && strlen($decoded) === 32 ? 0 : 1);'; then
+        echo -e " ${RED}Lỗi: AI_CUSTOMER_SERVICE_ENCRYPTION_KEY đã tồn tại nhưng không hợp lệ; giữ nguyên .env để tránh mất quyền giải mã bí mật.${NC}"
+        exit 1
+    fi
+
     MIG_TOTAL=0
     MIG_FAILED=""
     while IFS= read -r MIG_FILE; do

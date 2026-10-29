@@ -140,6 +140,11 @@ DOMAIN_ESCAPED="$(escape_sed_replacement "$DOMAIN")"
 sed -i "s|^DB_DRIVER=.*|DB_DRIVER=mysql|; s|^DB_HOST=.*|DB_HOST=127.0.0.1|; s|^DB_PORT=.*|DB_PORT=3306|; s|^DB_DATABASE=.*|DB_DATABASE=$DB_NAME_ESCAPED|; s|^DB_USERNAME=.*|DB_USERNAME=$DB_USER_ESCAPED|; s|^DB_PASSWORD=.*|DB_PASSWORD=$DB_PASS_ESCAPED|; s|^APP_URL=.*|APP_URL=https://$DOMAIN_ESCAPED|" "$APP_PATH/.env"
 unset DB_PASS
 
+# Generate the stable key used to encrypt provider and Meta credentials.
+AI_CS_ENCRYPTION_KEY="$(php -r 'echo base64_encode(random_bytes(32));')"
+printf '\nAI_CUSTOMER_SERVICE_ENCRYPTION_KEY=%s\n' "$AI_CS_ENCRYPTION_KEY" >> "$APP_PATH/.env"
+unset AI_CS_ENCRYPTION_KEY
+
 # Sinh secret Webhook thanh toán ngẫu nhiên (bắt buộc để xác thực webhook)
 MACRODROID_SECRET_VALUE="$(php -r 'echo bin2hex(random_bytes(32));')"
 sed -i "s|^MACRODROID_SECRET=.*|MACRODROID_SECRET=$MACRODROID_SECRET_VALUE|" "$APP_PATH/.env"
