@@ -36,6 +36,7 @@ final class AiCustomerServiceMetaService
             'verify_token_configured' => $this->isConfigured('ai_cs_meta_verify_token_encrypted'),
             'page_access_token_configured' => $this->isConfigured('ai_cs_meta_page_access_token_encrypted'),
             'secret_storage_ready' => $this->vault->isReady(),
+            'webhook_events' => $this->configuredWebhookEvents(),
             'connection_verified_at' => $this->settings->getByKey('ai_cs_meta_connection_verified_at') ?? '',
             'last_webhook_received_at' => $this->settings->getByKey('ai_cs_meta_last_webhook_received_at') ?? '',
         ];
@@ -53,11 +54,26 @@ final class AiCustomerServiceMetaService
         $appSecret = $input['meta_app_secret'] ?? '';
         $verifyToken = $input['verify_token'] ?? '';
         $pageToken = $input['page_access_token'] ?? '';
+        $webhookEvents = $input['webhook_events'] ?? $this->configuredWebhookEvents();
         foreach ([$appId, $pageId, $appSecret, $verifyToken, $pageToken] as $value) {
             if (!is_string($value)) {
                 throw new InvalidArgumentException('Định dạng cấu hình Meta không hợp lệ.');
             }
         }
+        if (!is_array($webhookEvents)
+            || array_filter($webhookEvents, 'is_string') !== $webhookEvents) {
+            throw new InvalidArgumentException('Danh sách sự kiện webhook không hợp lệ.');
+        }
+        $allowedWebhookEvents = ['messages', 'messaging_postbacks', 'message_deliveries', 'message_reads'];
+        $webhookEvents = array_values(array_unique($webhookEvents));
+        if (array_diff($webhookEvents, $allowedWebhookEvents) !== []
+            || !in_array('messages', $webhookEvents, true)) {
+            throw new InvalidArgumentException('Phải chọn sự kiện messages để AI nhận tin nhắn Facebook.');
+        }
+        $webhookEvents = array_values(array_filter(
+            $allowedWebhookEvents,
+            static fn(string $event): bool => in_array($event, $webhookEvents, true)
+        ));
 
         $appId = trim($appId);
         $pageId = trim($pageId);
@@ -99,6 +115,10 @@ final class AiCustomerServiceMetaService
             foreach ($encrypted as $key => $value) {
                 $this->settings->setByKey($key, $value);
             }
+            $this->settings->setByKey(
+                'ai_cs_meta_webhook_events',
+                json_encode($webhookEvents, JSON_THROW_ON_ERROR)
+            );
             $this->settings->setByKey('ai_cs_meta_connection_verified_at', '');
             $this->settings->setByKey('ai_cs_meta_last_webhook_received_at', '');
             $this->audit->record($adminId, 'meta_saved');
@@ -466,5 +486,27 @@ final class AiCustomerServiceMetaService
             }
         }
         return $missing;
+    }
+
+    private function configuredWebhookEvents(): array
+    {
+        $stored = $this->settings->getByKey('ai_cs_meta_webhook_events');
+        if ($stored === null || $stored === '') {
+            return ['messages'];
+        }
+        try {
+            $events = json_decode($stored, true, 16, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $exception) {
+            throw new RuntimeException('Không thể đọc danh sách sự kiện webhook Meta.', 0, $exception);
+        }
+        if (!is_array($events) || array_filter($events, 'is_string') !== $events) {
+            throw new RuntimeException('Danh sách sự kiện webhook Meta đã lưu không hợp lệ.');
+        }
+        $allowed = ['messages', 'messaging_postbacks', 'message_deliveries', 'message_reads'];
+        $events = array_values(array_unique(array_filter(
+            $events,
+            static fn(string $event): bool => in_array($event, $allowed, true)
+        )));
+        return in_array('messages', $events, true) ? $events : ['messages'];
     }
 }

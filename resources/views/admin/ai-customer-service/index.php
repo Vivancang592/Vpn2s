@@ -493,12 +493,14 @@ ob_start();
                         </div>
                     </div>
                     <div class="field-block wide webhook-events-field">
-                        <label>Sự kiện webhook dự kiến</label>
+                        <label>Sự kiện cần đăng ký trong Meta</label>
+                        <p class="field-help">Danh sách này chỉ được lưu để nhắc cấu hình; cần tự bật sự kiện tương ứng trong ứng dụng Meta. Bắt buộc bật messages để Nhân viên AI nhận tin.</p>
                         <div class="event-options">
-                            <label><input type="checkbox" name="webhook_events[]" value="messages" /> messages</label>
-                            <label><input type="checkbox" name="webhook_events[]" value="messaging_postbacks" /> messaging_postbacks</label>
-                            <label><input type="checkbox" name="webhook_events[]" value="message_deliveries" /> message_deliveries</label>
-                            <label><input type="checkbox" name="webhook_events[]" value="message_reads" /> message_reads</label>
+                            <?php $metaWebhookEvents = $aiSettings['webhook_events'] ?? ['messages']; ?>
+                            <label><input type="checkbox" name="webhook_events[]" value="messages" <?= in_array('messages', $metaWebhookEvents, true) ? 'checked' : '' ?> /> messages</label>
+                            <label><input type="checkbox" name="webhook_events[]" value="messaging_postbacks" <?= in_array('messaging_postbacks', $metaWebhookEvents, true) ? 'checked' : '' ?> /> messaging_postbacks</label>
+                            <label><input type="checkbox" name="webhook_events[]" value="message_deliveries" <?= in_array('message_deliveries', $metaWebhookEvents, true) ? 'checked' : '' ?> /> message_deliveries</label>
+                            <label><input type="checkbox" name="webhook_events[]" value="message_reads" <?= in_array('message_reads', $metaWebhookEvents, true) ? 'checked' : '' ?> /> message_reads</label>
                         </div>
                     </div>
                 </div>
@@ -1728,6 +1730,12 @@ ob_start();
         text-transform: uppercase;
         color: var(--ios-text-secondary);
     }
+    .field-block .field-help {
+        margin: 0;
+        color: var(--ios-text-secondary);
+        font-size: 0.76rem;
+        line-height: 1.5;
+    }
     .field-value {
         background: rgba(255,255,255,0.02);
         border: 1px solid var(--glass-border);
@@ -2888,7 +2896,12 @@ ob_start();
                 : 'Thiếu: ' + (Array.isArray(monitorMeta.missing_fields) && monitorMeta.missing_fields.length
                     ? monitorMeta.missing_fields.join(', ')
                     : 'thông tin cấu hình Meta') + '.';
-            document.querySelector('[data-monitor-rule="meta"]').textContent = metaDetail + webhookDetail;
+            const selectedWebhookEvents = Array.isArray(monitorMeta.webhook_events)
+                ? monitorMeta.webhook_events.join(', ')
+                : 'messages';
+            document.querySelector('[data-monitor-rule="meta"]').textContent = metaDetail
+                + ' Danh sách cần bật trong Meta: ' + selectedWebhookEvents + '.'
+                + webhookDetail;
             document.querySelector('[data-monitor-provider]').textContent = monitorProvider.configured
                 ? (monitorProvider.connection_verified
                     ? 'Đã kiểm tra kết nối ' + (monitorProvider.name || 'provider')
@@ -3246,6 +3259,7 @@ ob_start();
             'meta_app_secret_configured' => $aiSettings['meta_app_secret_configured'] ?? false,
             'verify_token_configured' => $aiSettings['verify_token_configured'] ?? false,
             'page_access_token_configured' => $aiSettings['page_access_token_configured'] ?? false,
+            'webhook_events' => $aiSettings['webhook_events'] ?? ['messages'],
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const settings = document.querySelectorAll('.setting-panel .field-input, .setting-panel input[type="checkbox"]');
         const storedSettingsValue = readStored(settingsKey, {});
@@ -3389,7 +3403,8 @@ ob_start();
             if (field.hasAttribute('data-preview-secret')) return;
             if (['provider', 'model', 'endpoint', 'temperature', 'max_tokens'].includes(field.name)) return;
             if (field.name === 'webhook_events[]') {
-                field.checked = Array.isArray(storedSettings.webhook_events) && storedSettings.webhook_events.includes(field.value);
+                field.checked = Array.isArray(providerSettings.webhook_events)
+                    && providerSettings.webhook_events.includes(field.value);
                 return;
             }
             if (field.name === 'handoff_triggers[]') {
@@ -3645,9 +3660,14 @@ ob_start();
                             meta_app_secret: fanpage.querySelector('[name="meta_app_secret"]').value.trim(),
                             meta_page_id: fanpage.querySelector('[name="meta_page_id"]').value.trim(),
                             verify_token: fanpage.querySelector('[name="verify_token"]').value.trim(),
-                            page_access_token: fanpage.querySelector('[name="page_access_token"]').value.trim()
+                            page_access_token: fanpage.querySelector('[name="page_access_token"]').value.trim(),
+                            webhook_events: Array.from(fanpage.querySelectorAll('[name="webhook_events[]"]:checked'))
+                                .map((field) => field.value)
                         });
                         Object.assign(providerSettings, response.settings);
+                        fanpage.querySelectorAll('[name="webhook_events[]"]').forEach((field) => {
+                            field.checked = providerSettings.webhook_events.includes(field.value);
+                        });
                         notify(response.message);
                         recordAudit('Lưu ' + settingsGroupLabels[group], 'Cấu hình được lưu ở server; bí mật không được trả về trình duyệt.');
                         await refreshMonitorStatus(true);

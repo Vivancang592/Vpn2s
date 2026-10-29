@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Controllers\Api;
 
 use App\Services\AiCustomerServiceMetaService;
+use App\Services\AiCustomerServiceAuditService;
 use App\Services\AiCustomerServiceWebsiteChatService;
 use DomainException;
 use InvalidArgumentException;
+use PDOException;
 use RuntimeException;
 
 final class AiCustomerServiceMetaWebhookController
@@ -59,9 +61,19 @@ final class AiCustomerServiceMetaWebhookController
         $this->respondAndContinue('EVENT_RECEIVED', 200);
         set_time_limit(0);
         $chat = new AiCustomerServiceWebsiteChatService();
+        $audit = new AiCustomerServiceAuditService();
         foreach ($result['conversation_ids'] ?? [] as $conversationId) {
             if (is_int($conversationId) && $conversationId > 0) {
-                $chat->respondToUnansweredCustomerMessage($conversationId);
+                try {
+                    $replyStatus = $chat->respondToUnansweredCustomerMessage($conversationId);
+                    if ($replyStatus === 'replied') {
+                        $audit->record(null, 'facebook_auto_reply_sent');
+                    } elseif (!in_array($replyStatus, ['already_answered', 'no_pending'], true)) {
+                        $audit->record(null, 'facebook_auto_reply_skipped');
+                    }
+                } catch (PDOException | RuntimeException) {
+                    $audit->record(null, 'facebook_auto_reply_failed');
+                }
             }
         }
     }

@@ -63,6 +63,8 @@ final class AiCustomerServiceWebsiteChatService
             || !$providerSettings['secret_storage_ready']
             || $providerSettings['model'] === ''
             || $providerSettings['model'] === 'auto') {
+            $this->markAiResponseError($conversationId);
+            $this->audit->record(null, 'provider_generation_failed');
             return 'provider_unavailable';
         }
 

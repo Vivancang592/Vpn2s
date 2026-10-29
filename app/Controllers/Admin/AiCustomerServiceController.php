@@ -173,6 +173,7 @@ class AiCustomerServiceController extends BaseController
             'meta' => [
                 'configured' => $meta['configured'],
                 'missing_fields' => $meta['missing_fields'],
+                'webhook_events' => $meta['webhook_events'],
                 'connection_verified' => $meta['connection_verified'],
                 'connection_verified_at' => $meta['connection_verified_at'],
                 'last_webhook_received_at' => $meta['last_webhook_received_at'],

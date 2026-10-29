@@ -61,6 +61,7 @@
 - [x] Triển khai xác minh callback, HMAC chữ ký request, chống gửi lặp theo khóa DB và lưu sự kiện tin nhắn.
 - [x] Nối nhận/gửi tin nhắn Fanpage; tin inbound hợp lệ chuyển sang AI và tự xử lý sau khi callback được xác nhận, đồng thời giữ nguyên trạng thái kỹ thuật viên tiếp quản/yêu cầu handoff.
 - [x] Nút kiểm tra Meta gọi Graph API kiểm tra Page ID/Page Access Token; tab Giám sát nêu rõ trường còn thiếu, kết quả kiểm tra và thời điểm webhook hợp lệ cuối cùng.
+- [x] Lưu lựa chọn sự kiện webhook ở server, mặc định bắt buộc `messages`; giao diện nêu rõ cần đăng ký subscription tương ứng trong Meta Developer. Kết quả gửi/bỏ qua/lỗi auto-reply Facebook được ghi audit, và thiếu provider/model chuyển hội thoại sang trạng thái lỗi để dễ phát hiện.
 - **Tiêu chí hoàn thành:** mã xử lý đã nối; cần xác nhận trên credential thật rằng kiểm tra kết nối thành công, webhook nhận event và AI gửi reply đúng.
 
 ### Phần 6F — Kiến thức, quy tắc và tác vụ vận hành
