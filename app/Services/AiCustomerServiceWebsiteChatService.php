@@ -172,10 +172,18 @@ final class AiCustomerServiceWebsiteChatService
                 return 'image_handoff';
             }
             $this->markAiResponseError($conversationId);
+            $metaErrorCode = $exception instanceof AiCustomerServiceMetaApiException
+                ? $exception->graphErrorCode
+                : null;
+            $metaErrorSubcode = $exception instanceof AiCustomerServiceMetaApiException
+                ? $exception->graphErrorSubcode
+                : null;
             $this->audit->record(
                 null,
                 'resume_reply_failed',
-                $this->diagnosticCodeForFailure($failureStage, $exception)
+                $this->diagnosticCodeForFailure($failureStage, $exception),
+                $metaErrorCode,
+                $metaErrorSubcode
             );
             return 'failed';
         }

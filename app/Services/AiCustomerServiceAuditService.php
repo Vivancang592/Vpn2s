@@ -59,10 +59,20 @@ final class AiCustomerServiceAuditService
         'conversation_deleted' => 'Quản trị viên đã xóa toàn bộ một hội thoại; không ghi nội dung tin nhắn.',
     ];
 
-    public function record(?int $adminId, string $event, ?string $diagnosticCode = null): void
+    public function record(
+        ?int $adminId,
+        string $event,
+        ?string $diagnosticCode = null,
+        ?int $metaErrorCode = null,
+        ?int $metaErrorSubcode = null
+    ): void
     {
         if (!isset(self::EVENTS[$event]) || ($adminId !== null && $adminId < 1)) {
             throw new InvalidArgumentException('Sự kiện audit không hợp lệ.');
+        }
+        if (($metaErrorCode !== null && ($metaErrorCode < 0 || $metaErrorCode > 2_147_483_647))
+            || ($metaErrorSubcode !== null && ($metaErrorSubcode < 0 || $metaErrorSubcode > 2_147_483_647))) {
+            throw new InvalidArgumentException('Mã lỗi Meta không hợp lệ.');
         }
 
         $description = self::EVENTS[$event];
@@ -71,6 +81,13 @@ final class AiCustomerServiceAuditService
                 throw new InvalidArgumentException('Mã chẩn đoán audit không hợp lệ.');
             }
             $description .= ' Nguyên nhân: ' . self::DIAGNOSTICS[$diagnosticCode];
+        }
+        if ($metaErrorCode !== null || $metaErrorSubcode !== null) {
+            $description .= ' Mã Graph API: '
+                . ($metaErrorCode === null ? 'không có' : (string) $metaErrorCode)
+                . '; mã phụ: '
+                . ($metaErrorSubcode === null ? 'không có' : (string) $metaErrorSubcode)
+                . '.';
         }
 
         $created = (new SystemLog())->create([

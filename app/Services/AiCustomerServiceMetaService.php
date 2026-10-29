@@ -183,7 +183,6 @@ final class AiCustomerServiceMetaService
             }
             $success = curl_exec($handle);
             $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
-            $curlError = $success === false ? curl_error($handle) : '';
         } finally {
             curl_close($handle);
         }
@@ -444,12 +443,22 @@ final class AiCustomerServiceMetaService
         } finally {
             curl_close($handle);
         }
-        if ($success === false || $status < 200 || $status >= 300) {
-            $errorCode = $status >= 400 && $status <= 599 ? $status : 0;
-            $message = $curlError !== ''
-                ? 'Không kết nối được tới Meta để gửi tin nhắn.'
-                : 'Meta không nhận tin nhắn. Kiểm tra quyền Page và trạng thái hội thoại.';
-            throw new RuntimeException($message, $errorCode);
+        if ($status >= 400 && $status <= 599) {
+            $response = json_decode($body, true);
+            $error = is_array($response) && is_array($response['error'] ?? null)
+                ? $response['error']
+                : [];
+            throw new AiCustomerServiceMetaApiException(
+                $status,
+                $this->graphErrorNumber($error['code'] ?? null, 2_147_483_647),
+                $this->graphErrorNumber($error['error_subcode'] ?? null, 2_147_483_647)
+            );
+        }
+        if ($success === false) {
+            throw new RuntimeException('Không kết nối được tới Meta để gửi tin nhắn.');
+        }
+        if ($status < 200 || $status >= 300) {
+            throw new RuntimeException('Meta không nhận tin nhắn. Kiểm tra quyền Page và trạng thái hội thoại.');
         }
         try {
             $result = json_decode($body, true, 32, JSON_THROW_ON_ERROR);
@@ -461,6 +470,18 @@ final class AiCustomerServiceMetaService
             throw new RuntimeException('Meta không trả về mã tin nhắn hợp lệ.');
         }
         return $messageId;
+    }
+
+    private function graphErrorNumber(mixed $value, int $maximum): ?int
+    {
+        if (is_int($value)) {
+            return $value >= 0 && $value <= $maximum ? $value : null;
+        }
+        if (!is_string($value) || preg_match('/^[0-9]{1,10}$/', $value) !== 1) {
+            return null;
+        }
+        $number = (int) $value;
+        return $number <= $maximum ? $number : null;
     }
 
     private function isConfigured(string $key): bool
