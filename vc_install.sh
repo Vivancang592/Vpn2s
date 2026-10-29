@@ -51,8 +51,8 @@ if [[ -z "$ADMIN_USER" || -z "$ADMIN_EMAIL" || -z "$ADMIN_PASS" ]]; then
     exit 1
 fi
 
-if [[ ! -f "$APP_PATH/.env.example" || ! -f "$APP_PATH/database/vpn_service.sql" ]]; then
-    echo -e "${RED}Lỗi: Thiếu file .env.example hoặc database/vpn_service.sql trong gói mã nguồn.${NC}"
+if [[ ! -f "$APP_PATH/.env.example" || ! -f "$APP_PATH/database/vpn2s.sql" ]]; then
+    echo -e "${RED}Lỗi: Thiếu file .env.example hoặc database/vpn2s.sql trong gói mã nguồn.${NC}"
     exit 1
 fi
 
@@ -92,7 +92,7 @@ SCHEMA_EXISTS="$(mysql -N -s -h 127.0.0.1 -u "$DB_USER" "$DB_NAME" -e "SELECT 1 
 if [[ "$SCHEMA_EXISTS" == "1" ]]; then
     echo -e " ${YELLOW}ℹ Schema đã tồn tại, bỏ qua import để bảo toàn dữ liệu.${NC}"
 else
-    mysql --force=false -h 127.0.0.1 -u "$DB_USER" "$DB_NAME" < "$APP_PATH/database/vpn_service.sql"
+    mysql --force=false -h 127.0.0.1 -u "$DB_USER" "$DB_NAME" < "$APP_PATH/database/vpn2s.sql"
     echo -e " ${GREEN}✔ Import cơ sở dữ liệu thành công.${NC}"
 fi
 
