@@ -31,6 +31,7 @@ if (isset($_SESSION['user_id'])) {
     <hr class="sidebar-divider">
     <?php if ($userRole === 'admin'): ?>
     <a href="/admin" class="nav-item <?= $activeMenu === 'dashboard' ? 'active' : '' ?>"><span class="sidebar-nav-icon" aria-hidden="true"><?= vc_admin_icon('DSH') ?></span>Tổng Quan</a>
+    <a href="/admin/ai-customer-service" class="nav-item <?= $activeMenu === 'ai-customer-service' ? 'active' : '' ?>"><span class="sidebar-nav-icon" aria-hidden="true"><?= vc_admin_icon('AI') ?></span>AI Customer Service</a>
     <a href="/admin/settings" class="nav-item <?= $activeMenu === 'settings' ? 'active' : '' ?>"><span class="sidebar-nav-icon" aria-hidden="true"><?= vc_admin_icon('CFG') ?></span>Cài Đặt</a>
     <a href="/admin/server-groups" class="nav-item <?= in_array($activeMenu, $infrastructureMenus, true) ? 'active' : '' ?>"><span class="sidebar-nav-icon" aria-hidden="true"><?= vc_admin_icon('INF') ?></span>Hạ Tầng</a>
     <a href="/admin/users" class="nav-item <?= $activeMenu === 'users' ? 'active' : '' ?>"><span class="sidebar-nav-icon" aria-hidden="true"><?= vc_admin_icon('USR') ?></span>Người Dùng</a>    

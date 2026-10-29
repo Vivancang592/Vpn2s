@@ -1,6 +1,8 @@
 .env
 .env.backup.*
 /storage/logs/*
+/storage/ai-chat/
+/storage/ai-chat-typing/
 /storage/backups/
 /storage/tmp/
 /storage/_legacy_backup/

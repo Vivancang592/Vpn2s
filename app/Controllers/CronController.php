@@ -69,8 +69,10 @@ class CronController extends BaseController
             'expiring_soon'  => 0,
             'cancelled_orders' => 0,
             'cancelled_subscriptions' => 0,
-            'monthly_reset'  => false
+            'monthly_reset'  => false,
+            'ai_conversations_deleted' => 0,
         ];
+        $warnings = [];
 
         $pendingOrderTimeout = max(1, (int) $settingModel->get('pending_order_timeout_minutes', '30'));
         $stats['cancelled_orders'] = $orderModel->cancelExpiredPending($pendingOrderTimeout);
@@ -261,10 +263,21 @@ class CronController extends BaseController
             }
         }
 
+        try {
+            $stats['ai_conversations_deleted'] = (new \App\Services\AiCustomerServiceRetentionService())
+                ->cleanupInactiveConversations(7, 100);
+        } catch (\RuntimeException $exception) {
+            error_log('AI conversation retention cleanup failed: ' . $exception->getMessage());
+            $warnings[] = 'Không thể dọn hội thoại AI hết hạn lưu trữ trong lần chạy này.';
+        }
+
         $this->json([
             'status'  => true,
-            'message' => 'Hoàn tất tiến trình tự động quét gói cước.',
-            'data'    => $stats
+            'message' => $warnings === []
+                ? 'Hoàn tất tiến trình tự động quét gói cước và dọn dữ liệu theo chính sách lưu trữ.'
+                : 'Hoàn tất tiến trình tự động quét gói cước nhưng có tác vụ lưu trữ cần kiểm tra.',
+            'data'    => $stats,
+            'warnings' => $warnings,
         ]);
     }
 

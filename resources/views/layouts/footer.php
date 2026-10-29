@@ -9,6 +9,8 @@ $zaloUrl = trim((string)($settings['zalo_url'] ?? ''));
 $youtubeUrl = trim((string)($settings['youtube_url'] ?? ''));
 $wechatId = trim((string)($settings['wechat_id'] ?? ''));
 $contactEmail = trim((string)($settings['contact_email'] ?? ''));
+$requestPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
+$isAdminPath = $requestPath === '/admin' || str_starts_with($requestPath, '/admin/');
 
 $hasContactLinks = $fanpageUrl !== '' || $zaloUrl !== '' || $youtubeUrl !== '' || $wechatId !== '' || $contactEmail !== '';
 
@@ -81,6 +83,44 @@ $zaloHref = $normalizeUrl($zaloUrl, 'https://zalo.me/');
     </div>
 </footer>
 
+<?php if (!$isAdminPath && ($settings['ai_cs_web_chat_enabled'] ?? '0') === '1'): ?>
+    <link rel="stylesheet" href="/assets/css/ai-customer-service-chat.css?v=<?= vc_asset_ver('css/ai-customer-service-chat.css') ?>">
+    <section id="vc-ai-chat" aria-label="Hỗ trợ khách hàng">
+        <button type="button" class="vc-ai-chat-launcher" aria-expanded="false" aria-controls="vc-ai-chat-panel">Chat hỗ trợ</button>
+        <div class="vc-ai-chat-panel" id="vc-ai-chat-panel" hidden>
+            <div class="vc-ai-chat-heading">
+                <div>
+                    <strong>Hỗ trợ VPN2S</strong>
+                    <span>Chúng tôi luôn sẵn sàng hỗ trợ bạn</span>
+                </div>
+                <button type="button" class="vc-ai-chat-close" aria-label="Đóng cửa sổ chat">×</button>
+            </div>
+            <div class="vc-ai-chat-disclosure">Không gửi mật khẩu, mã xác thực hoặc thông tin thanh toán.</div>
+            <div class="vc-ai-chat-messages" aria-live="polite"></div>
+            <div class="vc-ai-chat-status" role="status" aria-live="polite"></div>
+            <form class="vc-ai-chat-contact" hidden>
+                <label for="vc-ai-chat-email">Email để nhân viên liên hệ</label>
+                <div>
+                    <input id="vc-ai-chat-email" type="email" required maxlength="254" autocomplete="email" placeholder="ban@example.com" />
+                    <button type="submit">Gửi email</button>
+                </div>
+            </form>
+            <form class="vc-ai-chat-form">
+                <input class="vc-ai-chat-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Chọn ảnh gửi trong chat hỗ trợ" />
+                <div class="vc-ai-chat-attachment" hidden></div>
+                <div class="vc-ai-chat-composer">
+                    <button class="vc-ai-chat-attach" type="button" aria-label="Đính kèm ảnh" title="Đính kèm ảnh">+</button>
+                    <label class="vc-ai-chat-sr-only" for="vc-ai-chat-input">Tin nhắn hỗ trợ</label>
+                    <textarea id="vc-ai-chat-input" rows="1" maxlength="4000" placeholder="Nhắn tin cho VPN2S..."></textarea>
+                    <button class="vc-ai-chat-send" type="submit" aria-label="Gửi tin nhắn" title="Gửi tin nhắn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" /></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+    <script src="/assets/js/ai-customer-service-chat.js?v=<?= vc_asset_ver('js/ai-customer-service-chat.js') ?>" defer></script>
+<?php endif; ?>
 
 <!-- Tải app.js với version theo filemtime (cache hit nếu file không đổi) -->
 <script src="/assets/js/app.js?v=<?= vc_asset_ver('js/app.js') ?>"></script>

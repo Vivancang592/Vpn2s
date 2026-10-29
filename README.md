@@ -168,6 +168,10 @@ crontab -e
 */5 * * * * curl -s "https://vpn2s.linksub24h.com/api/cron/check-subscriptions?key=YOUR_CRON_SECRET_KEY" > /dev/null 2>&1
 ```
 
+Tác vụ cron này cũng chạy dọn hội thoại AI quá 7 ngày không có hoạt động, nhưng chỉ khi công tắc **Xóa hội thoại cũ** trong AI Customer Service được bật. Mặc định chính sách tắt; mỗi lần chạy xử lý tối đa 100 hội thoại và xóa cả tin nhắn, lịch sử trạng thái cùng ảnh đính kèm riêng của các hội thoại đó.
+
+Nhật ký cấu hình AI Customer Service giữ tối đa 60 sự kiện mới nhất. Trong tab **Cài đặt**, có thể xem theo trang (mặc định 20 sự kiện/trang) và đổi kích thước trang từ 1 đến 60 sự kiện.
+
 ---
 
 * ##cấu trúc dự án:
@@ -236,7 +240,7 @@ vc-vpn-2027/
 │   ├── app.php
 │   └── database.php
 ├── database/
-│   └── vpn_service.sql
+│   └── vpn2s.sql
 ├── public/
 │   ├── assets/
 │   │   ├── css/

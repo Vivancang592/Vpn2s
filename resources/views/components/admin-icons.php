@@ -102,6 +102,10 @@ if (!function_exists('vc_admin_icon_paths')) {
             'AUT' => 'log-in',
             'EML' => 'mail',
             'MSG' => 'webhook',
+            'AI'  => 'sparkles',
+            'BOT' => 'bot',
+            'HUM' => 'user-check',
+            'TME' => 'message-square-text',
             'SID' => 'hash',
             'CMT' => 'message-square-text',
         ];

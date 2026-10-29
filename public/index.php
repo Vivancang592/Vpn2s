@@ -144,6 +144,14 @@ $routes = $routesNormalized;
 // 6. Xử lý Request & Router
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$appBasePath = rtrim((string) (parse_url((string) ($appConfig['url'] ?? ''), PHP_URL_PATH) ?: ''), '/');
+if (
+    $appBasePath !== ''
+    && strncasecmp($requestUri, $appBasePath, strlen($appBasePath)) === 0
+    && (strlen($requestUri) === strlen($appBasePath) || $requestUri[strlen($appBasePath)] === '/')
+) {
+    $requestUri = substr($requestUri, strlen($appBasePath)) ?: '/';
+}
 $routeKey = $requestMethod . ' ' . $requestUri;
 
 if (array_key_exists($routeKey, $routes)) {
