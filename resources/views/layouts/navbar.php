@@ -1,6 +1,5 @@
 <?php
 $siteTitle = $settings['site_title'] ?? 'VC VPN PANEL';
-$homeAnchorPrefix = '/'; // luôn tuyệt đối: href tĩnh giống nhau MỌI trang → partial-nav không giữ nhầm href "#..." của trang khác (vd đang ở /faq bấm "Sản phẩm" thành /faq#bang-gia)
 ?>
 <nav class="glass-card navbar-container">
     <!-- Bên trái: Toggle Sidebar Mobile (khi đã đăng nhập) OR Tên Web (khi chưa đăng nhập) -->
@@ -20,10 +19,7 @@ $homeAnchorPrefix = '/'; // luôn tuyệt đối: href tĩnh giống nhau MỌI 
     <!-- Giữa: Nút điều hướng các trang công khai (Desktop) -->
     <?php if (!isset($_SESSION['user_id'])): ?>
         <div class="nav-public-links">
-            <a href="/" class="nav-public-link">Trang chủ</a>
-            <a href="<?= $homeAnchorPrefix ?>#bang-gia" class="nav-public-link">Sản phẩm</a>
             <a href="/faq" class="nav-public-link">Hướng dẫn</a>
-            <a href="<?= $homeAnchorPrefix ?>#cau-hoi-thuong-gap" class="nav-public-link">Câu hỏi thường gặp</a>
             <a href="/download" class="nav-public-link">Tải ứng dụng</a>
         </div>
     <?php endif; ?>
@@ -118,10 +114,7 @@ $homeAnchorPrefix = '/'; // luôn tuyệt đối: href tĩnh giống nhau MỌI 
     <!-- Mobile Dropdown Menu nằm sát bên dưới Navbar hiển thị dạng 2 cột -->
     <?php if (!isset($_SESSION['user_id'])): ?>
         <div id="guest-dropdown-menu" class="guest-mobile-menu glass-card">
-            <a href="/" class="guest-nav-link">Trang chủ</a>
-            <a href="<?= $homeAnchorPrefix ?>#bang-gia" class="guest-nav-link">Sản phẩm</a>
             <a href="/faq" class="guest-nav-link">Hướng dẫn</a>
-            <a href="<?= $homeAnchorPrefix ?>#cau-hoi-thuong-gap" class="guest-nav-link">Câu hỏi thường gặp</a>
             <a href="/download" class="guest-nav-link">Tải ứng dụng</a>
             <div class="guest-auth-group">
                 <a href="/login" class="guest-auth-link">Đăng nhập</a>

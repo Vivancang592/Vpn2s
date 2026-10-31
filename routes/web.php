@@ -1,8 +1,8 @@
 <?php
 
 return [
-    // Trang chủ & Công khai (Public)
-    'GET /'                      => ['HomeController', 'index'],
+    // Trang chủ → vào thẳng trang đăng nhập (khách) / bảng điều khiển (đã đăng nhập)
+    'GET /'                      => ['AuthController', 'showLogin'],
     'GET /download'              => ['HomeController', 'download'],
     'GET /client'                => ['HomeController', 'client'],
     'GET /faq'                   => ['HomeController', 'faq'],
