@@ -3,6 +3,13 @@ $pageTitle = 'Gói Dịch Vụ - ' . ($settings['site_title'] ?? 'VC VPN PANEL')
 $availablePlans = isset($plans) && is_array($plans) ? $plans : [];
 $activeServerGroups = isset($serverGroups) && is_array($serverGroups) ? $serverGroups : [];
 
+// Danh sách thời hạn duy nhất (ngày) của các gói — dùng cho ô lọc thời hạn
+$durationOptions = array_values(array_unique(array_map(
+    static fn(array $plan): int => max(1, (int) ($plan['duration_days'] ?? 30)),
+    $availablePlans
+)));
+sort($durationOptions);
+
 // Hàm định dạng tiền tệ linh hoạt theo Cài Đặt Hệ Thống
 $formatPrice = function($amount) use ($settings, $formatMoney) {
     if (isset($formatMoney) && is_callable($formatMoney)) {
@@ -20,8 +27,8 @@ ob_start();
 
 <section class="user-plans-page" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box;">
 	<header class="user-plans-header">
-		<h2 class="u-plans-title">CHỌN GÓI DỊCH VỤ PHÙ HỢP VỚI BẠN</h2>
-		<p>Kết nối ổn định, bảo mật và linh hoạt trên mọi thiết bị, mọi lúc, mọi nơi.</p>
+		<h2 class="u-plans-title">CHỌN GÓI DỊCH VỤ PHÙ HỢP</h2>
+		<p>Bảo mật và linh hoạt trên mọi thiết bị, mọi lúc, mọi nơi.</p>
 	</header>
 
 	<?php if (!empty($_SESSION['error'])): ?>
@@ -30,11 +37,33 @@ ob_start();
 	<?php endif; ?>
 
 	<?php if (!empty($availablePlans)): ?>
-		<div class="user-plan-group-tabs" role="tablist" aria-label="Nhóm máy chủ">
-			<button type="button" class="user-plan-group-tab is-active" data-plan-group-filter="all" role="tab" aria-selected="true">Tất cả</button>
-			<?php foreach ($activeServerGroups as $group): ?>
-				<button type="button" class="user-plan-group-tab" data-plan-group-filter="<?= (int) ($group['id'] ?? 0) ?>" role="tab" aria-selected="false"><?= htmlspecialchars($group['name'] ?? 'Nhóm máy chủ') ?></button>
-			<?php endforeach; ?>
+		<!-- Cùng 1 hàng: tab nhóm máy chủ + nút sắp xếp giá + ô lọc thời hạn -->
+		<div class="user-plans-filterbar">
+			<!-- Dòng thông báo lưu ý quan trọng -->
+			<div class="u-alert u-alert--info" role="note">
+				<span><strong>💡Lưu ý quan trọng:</strong> Chất lượng kết nối phụ thuộc vào mạng Internet của Quý khách. Dịch vụ thường hoạt động tốt với mạng di động hoặc Wi-Fi có tín hiệu mạnh và ổn định. Nếu sử dụng trên Wi-Fi có chất lượng không ổn định, tốc độ và trải nghiệm có thể bị ảnh hưởng.</span>
+				<button type="button" class="u-alert-close" onclick="this.parentElement.remove();" aria-label="Đóng">&times;</button>
+			</div>
+			<div class="user-plan-group-tabs" role="tablist" aria-label="Nhóm máy chủ">
+				<button type="button" class="user-plan-group-tab is-active" data-plan-group-filter="all" role="tab" aria-selected="true">Tất cả</button>
+				<?php foreach ($activeServerGroups as $group): ?>
+					<button type="button" class="user-plan-group-tab" data-plan-group-filter="<?= (int) ($group['id'] ?? 0) ?>" role="tab" aria-selected="false"><?= htmlspecialchars($group['name'] ?? 'Nhóm máy chủ') ?></button>
+				<?php endforeach; ?>
+			</div>
+			<div class="user-plans-sort-controls">
+				<!-- Bấm để đổi chiều sắp xếp giá: thấp ↑ / cao ↓ -->
+				<button type="button" class="user-plan-sort-btn is-active" data-plan-sort="price" data-plan-sort-dir="asc" aria-pressed="true" title="Bấm để đổi chiều sắp xếp theo giá">
+					<span data-sort-text="">Giá thấp</span>
+					<span class="user-plan-sort-arrow" data-sort-arrow="" aria-hidden="true">↑</span>
+				</button>
+				<!-- Chọn thời hạn → chỉ hiện gói có đúng thời hạn đó -->
+				<select class="user-plan-duration-filter" data-plan-duration-filter aria-label="Lọc theo thời hạn gói">
+					<option value="all">Thời hạn: Tất cả</option>
+					<?php foreach ($durationOptions as $days): ?>
+						<option value="<?= $days ?>"><?= $days ?> ngày</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 		</div>
 
 		<div class="user-plans-grid" data-plan-grid style="width: 100% !important; max-width: 100% !important; display: grid; gap: 1.25rem;">
@@ -48,7 +77,7 @@ ob_start();
 				$isSoldOut = $stockQuantity !== null && (int) $stockQuantity <= 0;
 				$groupIds = isset($plan['group_ids']) && is_array($plan['group_ids']) ? array_map('intval', $plan['group_ids']) : [];
 				?>
-				<article class="glass-card user-plan-card<?= $isSoldOut ? ' is-sold-out' : '' ?>" data-plan-group-ids="<?= htmlspecialchars(implode(',', $groupIds)) ?>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box; width: 100%;">
+				<article class="glass-card user-plan-card<?= $isSoldOut ? ' is-sold-out' : '' ?>" data-plan-group-ids="<?= htmlspecialchars(implode(',', $groupIds)) ?>" data-plan-price="<?= (float) ($plan['price'] ?? 0) ?>" data-plan-duration="<?= $duration ?>" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box; width: 100%;">
 					<div>
 						<!-- Tên gói & Giá cước -->
 						<div class="user-plan-card-heading" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.15));">
@@ -140,8 +169,8 @@ ob_start();
 		</div>
 
 		<div class="glass-card user-plans-empty" data-plan-empty style="display: none; margin-top: 1rem; text-align: center; padding: 2.5rem 1.5rem; border-radius: var(--radius-md, 12px);">
-			<h2>Không có gói dịch vụ nào trong nhóm này</h2>
-			<p>Hiện nhóm máy chủ được chọn chưa có gói cước tương ứng. Vui lòng chọn nhóm khác hoặc nhấn "Tất cả".</p>
+			<h2>Không có gói dịch vụ phù hợp</h2>
+			<p>Hiện không có gói nào khớp với nhóm máy chủ hoặc thời hạn đang chọn. Hãy đổi nhóm, chọn "Thời hạn: Tất cả" hoặc nhấn "Tất cả".</p>
 		</div>
 	<?php else: ?>
 		<div class="glass-card user-plans-empty">

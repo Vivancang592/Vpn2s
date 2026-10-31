@@ -1095,6 +1095,44 @@ body.user-area .user-plan-group-tab.is-active {
   color: #fff;
   box-shadow: 0 6px 16px rgba(0, 122, 255, .35);
 }
+/* Thanh bộ lọc cùng hàng tab (nút giá + ô thời hạn) */
+body.user-area .user-plans-filterbar { margin-bottom: 1rem; }
+body.user-area .user-plan-duration-filter {
+  border-color: var(--u-border);
+  border-radius: var(--u-r-pill);
+  background: var(--u-surface-2);
+  color: var(--u-text-2);
+  transition: background var(--u-t), border-color var(--u-t), color var(--u-t), box-shadow var(--u-t);
+}
+body.user-area .user-plan-duration-filter:hover {
+  border-color: rgba(0, 122, 255, .45);
+  background: var(--u-accent-soft);
+  color: var(--u-accent-hover);
+}
+body.user-area .user-plan-duration-filter.is-active {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--u-accent), #005fce);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0, 122, 255, .35);
+}
+body.user-area .user-plan-sort-btn {
+  border-color: var(--u-border);
+  border-radius: var(--u-r-pill);
+  background: var(--u-surface-2);
+  color: var(--u-text-2);
+  transition: background var(--u-t), border-color var(--u-t), color var(--u-t), box-shadow var(--u-t);
+}
+body.user-area .user-plan-sort-btn:hover {
+  border-color: rgba(0, 122, 255, .45);
+  background: var(--u-accent-soft);
+  color: var(--u-accent-hover);
+}
+body.user-area .user-plan-sort-btn.is-active {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--u-accent), #005fce);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0, 122, 255, .35);
+}
 /* Thẻ gói */
 body.user-area .user-plan-card {
   border: 1px solid var(--u-border);

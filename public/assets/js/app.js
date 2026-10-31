@@ -767,37 +767,128 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Bộ lọc nhóm gói cước — chạy lại sau partial-load
+    // Bộ lọc nhóm gói cước + lọc thời hạn — chạy lại sau partial-load.
+    // Thẻ chỉ hiện khi TRÙNG nhóm đang chọn VÀ khớp thời hạn đang chọn.
     window.vcPageInits.push(function (root) {
     const planGroupTabs = root.querySelectorAll('[data-plan-group-filter]');
     const planCards = root.querySelectorAll('[data-plan-group-ids]');
     const planEmptyBlock = root.querySelector('[data-plan-empty]');
-    if (planGroupTabs.length && planCards.length) {
-        planGroupTabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                const selectedGroup = tab.dataset.planGroupFilter || 'all';
+    const durationFilter = root.querySelector('[data-plan-duration-filter]');
+    if (!planCards.length) return;
 
-                planGroupTabs.forEach(function (item) {
-                    const isSelected = item === tab;
-                    item.classList.toggle('is-active', isSelected);
-                    item.setAttribute('aria-selected', String(isSelected));
-                });
+    function refreshPlanVisibility() {
+        const activeTab = root.querySelector('[data-plan-group-filter].is-active');
+        const selectedGroup = activeTab ? (activeTab.dataset.planGroupFilter || 'all') : 'all';
+        const selectedDuration = durationFilter ? (durationFilter.value || 'all') : 'all';
 
-                let visibleCount = 0;
-                planCards.forEach(function (card) {
-                    const groupIds = (card.dataset.planGroupIds || '').split(',').filter(Boolean);
-                    const shouldShow = selectedGroup === 'all' || groupIds.includes(selectedGroup);
-                    card.hidden = !shouldShow;
-                    card.style.display = shouldShow ? 'flex' : 'none';
-                    if (shouldShow) visibleCount++;
-                });
-
-                if (planEmptyBlock) {
-                    planEmptyBlock.style.display = visibleCount === 0 ? 'block' : 'none';
-                }
-            });
+        let visibleCount = 0;
+        planCards.forEach(function (card) {
+            const groupIds = (card.dataset.planGroupIds || '').split(',').filter(Boolean);
+            const inGroup = selectedGroup === 'all' || groupIds.includes(selectedGroup);
+            const inDuration = selectedDuration === 'all' || card.dataset.planDuration === selectedDuration;
+            const shouldShow = inGroup && inDuration;
+            card.hidden = !shouldShow;
+            card.style.display = shouldShow ? 'flex' : 'none';
+            if (shouldShow) visibleCount++;
         });
+
+        if (planEmptyBlock) {
+            planEmptyBlock.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
     }
+
+    planGroupTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            planGroupTabs.forEach(function (item) {
+                const isSelected = item === tab;
+                item.classList.toggle('is-active', isSelected);
+                item.setAttribute('aria-selected', String(isSelected));
+            });
+
+            // Bấm "Tất cả" → reset TOÀN BỘ về ban đầu (kể cả thời hạn + giá)
+            const isAllTab = (tab.dataset.planGroupFilter || 'all') === 'all';
+            if (isAllTab && durationFilter) {
+                durationFilter.value = 'all';
+                durationFilter.classList.remove('is-active');
+            }
+
+            refreshPlanVisibility();
+
+            if (isAllTab) {
+                document.dispatchEvent(new CustomEvent('vcPlanFiltersReset'));
+            }
+        });
+    });
+
+    if (durationFilter && durationFilter.dataset.filterBound !== '1') {
+        durationFilter.dataset.filterBound = '1'; // chống gắn listener đôi
+        durationFilter.addEventListener('change', function () {
+            durationFilter.classList.toggle('is-active', durationFilter.value !== 'all');
+            refreshPlanVisibility();
+        });
+        durationFilter.classList.toggle('is-active', durationFilter.value !== 'all');
+    }
+
+    refreshPlanVisibility();
+    });
+
+    // Sắp xếp theo giá — mặc định: giá từ bé đến lớn.
+    // Nút hiển thị "Giá thấp ↑" / "Giá cao ↓"; bấm để đổi chiều.
+    window.vcPageInits.push(function (root) {
+        const grid = root.querySelector('[data-plan-grid]');
+        if (!grid) return;
+
+        const priceBtn = root.querySelector('[data-plan-sort="price"]');
+        if (!priceBtn) return;
+
+        const state = { dir: priceBtn.dataset.planSortDir === 'desc' ? 'desc' : 'asc' };
+
+        function applySort() {
+            const cards = Array.from(grid.querySelectorAll('[data-plan-price]'));
+            if (cards.length < 2) return;
+
+            const sorted = cards.slice().sort(function (a, b) {
+                const diff = (Number.parseFloat(a.dataset.planPrice) || 0) - (Number.parseFloat(b.dataset.planPrice) || 0);
+                if (diff === 0) return 0; // bằng nhau → giữ nguyên thứ tự (sort ổn định)
+                return state.dir === 'desc' ? -diff : diff;
+            });
+
+            const fragment = document.createDocumentFragment();
+            sorted.forEach(function (card) { fragment.appendChild(card); });
+            grid.appendChild(fragment); // thẻ ẩn theo bộ lọc vẫn giữ nguyên hidden
+        }
+
+        function renderBtn() {
+            priceBtn.classList.add('is-active');
+            priceBtn.setAttribute('aria-pressed', 'true');
+            priceBtn.dataset.planSortDir = state.dir;
+
+            const arrow = priceBtn.querySelector('[data-sort-arrow]');
+            if (arrow) arrow.textContent = state.dir === 'desc' ? '↓' : '↑';
+
+            const text = priceBtn.querySelector('[data-sort-text]');
+            if (text) text.textContent = state.dir === 'desc' ? 'Giá cao' : 'Giá thấp';
+        }
+
+        if (priceBtn.dataset.sortBound !== '1') { // chống gắn listener đôi
+            priceBtn.dataset.sortBound = '1';
+            priceBtn.addEventListener('click', function () {
+                state.dir = state.dir === 'desc' ? 'asc' : 'desc';
+                applySort();
+                renderBtn();
+            });
+
+            // Tab "Tất cả" được bấm → đưa giá về tăng dần (ban đầu)
+            document.addEventListener('vcPlanFiltersReset', function () {
+                if (!document.contains(priceBtn)) return; // init cũ của trang đã bị thay
+                state.dir = 'asc';
+                applySort();
+                renderBtn();
+            });
+        }
+
+        applySort();
+        renderBtn();
     });
 
     // Trang checkout (mã giảm giá / số tiền) — chạy lại sau partial-load
