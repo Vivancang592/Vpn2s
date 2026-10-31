@@ -1,7 +1,6 @@
 <?php
 $pageTitle = 'Gói Dịch Vụ - ' . ($settings['site_title'] ?? 'VC VPN PANEL');
 $availablePlans = isset($plans) && is_array($plans) ? $plans : [];
-$activeServerGroups = isset($serverGroups) && is_array($serverGroups) ? $serverGroups : [];
 
 // Danh sách thời hạn duy nhất (ngày) của các gói — dùng cho ô lọc thời hạn
 $durationOptions = array_values(array_unique(array_map(
@@ -37,18 +36,15 @@ ob_start();
 	<?php endif; ?>
 
 	<?php if (!empty($availablePlans)): ?>
-		<!-- Cùng 1 hàng: tab nhóm máy chủ + nút sắp xếp giá + ô lọc thời hạn -->
+		<!-- Cùng 1 hàng: nút Tất cả + nút sắp xếp giá + ô lọc thời hạn -->
 		<div class="user-plans-filterbar">
 			<!-- Dòng thông báo lưu ý quan trọng -->
 			<div class="u-alert u-alert--info" role="note">
 				<span><strong>💡Lưu ý quan trọng:</strong> Chất lượng kết nối phụ thuộc vào mạng Internet của Quý khách. Dịch vụ thường hoạt động tốt với mạng di động hoặc Wi-Fi có tín hiệu mạnh và ổn định. Nếu sử dụng trên Wi-Fi có chất lượng không ổn định, tốc độ và trải nghiệm có thể bị ảnh hưởng.</span>
 				<button type="button" class="u-alert-close" onclick="this.parentElement.remove();" aria-label="Đóng">&times;</button>
 			</div>
-			<div class="user-plan-group-tabs" role="tablist" aria-label="Nhóm máy chủ">
+			<div class="user-plan-group-tabs" role="tablist" aria-label="Lọc gói dịch vụ">
 				<button type="button" class="user-plan-group-tab is-active" data-plan-group-filter="all" role="tab" aria-selected="true">Tất cả</button>
-				<?php foreach ($activeServerGroups as $group): ?>
-					<button type="button" class="user-plan-group-tab" data-plan-group-filter="<?= (int) ($group['id'] ?? 0) ?>" role="tab" aria-selected="false"><?= htmlspecialchars($group['name'] ?? 'Nhóm máy chủ') ?></button>
-				<?php endforeach; ?>
 			</div>
 			<div class="user-plans-sort-controls">
 				<!-- Bấm để đổi chiều sắp xếp giá: thấp ↑ / cao ↓ -->
