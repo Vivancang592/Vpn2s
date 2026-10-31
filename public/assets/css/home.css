@@ -5,7 +5,7 @@
 
 /* Final landing system: restrained Gotham-inspired security operations. */
 body.vpn-theme.home-festival { background: #0a0e17; }
-body.vpn-theme.home-festival .navbar-container { position: sticky; z-index: 30; min-height: 68px; margin: 0 !important; padding-inline: clamp(1rem, 5vw, 5rem) !important; border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, .1) !important; background: rgba(10, 14, 23, .86) !important; box-shadow: none; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+body.vpn-theme.home-festival .navbar-container { position: sticky; z-index: 100; min-height: 68px; margin: 0 !important; padding-inline: clamp(1rem, 5vw, 5rem) !important; border: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, .1) !important; background: rgba(10, 14, 23, .86) !important; box-shadow: none; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 body.vpn-theme.home-festival .nav-brand strong { color: #007aff; font-size: 1rem; letter-spacing: .08em; }
 body.vpn-theme.home-festival .nav-public-links { gap: clamp(.8rem, 2.5vw, 2rem); }
 body.vpn-theme.home-festival .nav-public-link { color: #9aa7bd; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
